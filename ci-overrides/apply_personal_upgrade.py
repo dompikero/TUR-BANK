@@ -181,7 +181,7 @@ nav_start = screens.find("@Composable\nfun MainBankNavigation(vm: BankViewModel)
 if lock_start < 0 or nav_start < 0 or nav_start <= lock_start:
     raise SystemExit("Could not isolate access-lock composable.")
 lock_screen = '''@Composable
-fun DemoLockScreen(showBiometric: Boolean, onUnlock: () -> Unit, onBiometricUnlock: () -> Unit) {
+fun DemoLockScreen(language: String, showBiometric: Boolean, onUnlock: () -> Unit, onBiometricUnlock: () -> Unit) {
     val context = LocalContext.current
     val prefs = remember { context.getSharedPreferences("tur_bank_personal_profile", Context.MODE_PRIVATE) }
     val salt = remember { prefs.getString("profile_pin_salt", "").orEmpty() }
@@ -195,7 +195,7 @@ fun DemoLockScreen(showBiometric: Boolean, onUnlock: () -> Unit, onBiometricUnlo
         Icon(Icons.Default.Shield, contentDescription = null, modifier = Modifier.size(46.dp), tint = MaterialTheme.colorScheme.primary)
         Spacer(Modifier.height(20.dp))
         Text("TUR BANK", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.ExtraBold)
-        Text(appText("tr", "Hesabının kilidini aç", "Unlock your account", "Konto entsperren"), style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
+        Text(appText(language, "Hesabının kilidini aç", "Unlock your account", "Konto entsperren"), style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
         Spacer(Modifier.height(8.dp))
         Text(appText("tr", "Kurulum sırasında oluşturduğun PIN'i gir.", "Enter the PIN you created during setup.", "Gib die bei der Einrichtung erstellte PIN ein."), color = MaterialTheme.colorScheme.onSurfaceVariant)
         Spacer(Modifier.height(20.dp))
