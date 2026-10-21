@@ -69,7 +69,7 @@ jobs:
           if [[ -z "$SETTINGS_FILE" ]]; then
             SOURCE_ZIP="$(find "$GITHUB_WORKSPACE" -maxdepth 3 -type f -name 'TUR-BANK-SOURCE.zip' -print -quit 2>/dev/null || true)"
             if [[ -n "$SOURCE_ZIP" ]]; then
-              EXTRACT_DIR="$GITHUB_WORKSPACE/.ci-source-extracted"
+              EXTRACT_DIR="$GITHUB_WORKSPACE/TUR-BANK-SOURCE"
               rm -rf "$EXTRACT_DIR"
               mkdir -p "$EXTRACT_DIR"
               if ! unzip -oq "$SOURCE_ZIP" -d "$EXTRACT_DIR"; then
@@ -126,3 +126,123 @@ jobs:
             **/gradle.properties
 
       - name: Set up Android SDK
+        id: setup_android
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android SDK packages
+        shell: bash
+        run: |
+          set -euo pipefail
+          yes | sdkmanager --licenses >/dev/null || true
+          sdkmanager "platform-tools" "platforms;android-35" "build-tools;35.0.0" 2>&1 | tee "$CI_REPORT_DIR/android-sdk-install.log"
+
+      - name: Set up Gradle 8.11.1 (use installed Gradle, not the wrapper JAR)
+        id: setup_gradle
+        uses: gradle/actions/setup-gradle@v6
+        with:
+          gradle-version: "8.11.1"
+          validate-wrappers: false
+
+      - name: Verify toolchain
+        shell: bash
+        run: |
+          set -euo pipefail
+          {
+            echo "Java version:"
+            java -version
+            echo
+            echo "Gradle version:"
+            gradle --version
+            echo
+            echo "Installed Android SDK:"
+            sdkmanager --list_installed
+            echo
+            echo "Project directory: $PROJECT_DIR"
+            ls -la "$PROJECT_DIR"
+          } 2>&1 | tee "$CI_REPORT_DIR/toolchain.log"
+
+      - name: Run unit tests
+        id: unit_tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          gradle -p "$PROJECT_DIR" --no-daemon --stacktrace testDebugUnitTest 2>&1 | tee "$CI_REPORT_DIR/unit-tests.log"
+
+      - name: Build debug APK
+        id: build_apk
+        shell: bash
+        run: |
+          set -euo pipefail
+          gradle -p "$PROJECT_DIR" --no-daemon --stacktrace assembleDebug 2>&1 | tee "$CI_REPORT_DIR/apk-build.log"
+
+      - name: Verify APK exists
+        id: verify_apk
+        shell: bash
+        run: |
+          set -euo pipefail
+          APK_PATH="$PROJECT_DIR/app/build/outputs/apk/debug/app-debug.apk"
+          if [[ ! -s "$APK_PATH" ]]; then
+            echo "::error::Build completed without the expected APK at $APK_PATH"
+            exit 1
+          fi
+          {
+            echo "APK path: $APK_PATH"
+            echo "APK size: $(stat -c '%s bytes' "$APK_PATH")"
+            echo "SHA-256: $(sha256sum "$APK_PATH" | awk '{print $1}')"
+          } | tee "$CI_REPORT_DIR/apk-verification.txt"
+
+      - name: Upload TUR BANK APK
+        if: success()
+        uses: actions/upload-artifact@v7
+        with:
+          name: TUR-BANK-APK
+          path: ${{ steps.locate_project.outputs.project_dir }}/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Create error report on failure
+        if: failure()
+        shell: bash
+        run: |
+          set +e
+          REPORT="$CI_REPORT_DIR/TUR-BANK-ERROR-REPORT.md"
+          {
+            echo "# TUR BANK — Build Error Report"
+            echo
+            echo "- Repository: $GITHUB_REPOSITORY"
+            echo "- Workflow run: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+            echo "- Attempt: $GITHUB_RUN_ATTEMPT"
+            echo "- Commit: $GITHUB_SHA"
+            echo "- Branch/ref: $GITHUB_REF"
+            echo "- Runner: $RUNNER_OS / $RUNNER_ARCH"
+            echo "- Project directory: ${PROJECT_DIR:-not discovered}"
+            echo
+            echo "## Step outcomes"
+            echo "- Project discovery: ${{ steps.locate_project.outcome || 'not run' }}"
+            echo "- JDK setup: ${{ steps.setup_java.outcome || 'not run' }}"
+            echo "- Gradle setup: ${{ steps.setup_gradle.outcome || 'not run' }}"
+            echo "- Android SDK setup: ${{ steps.setup_android.outcome || 'not run' }}"
+            echo "- Unit tests: ${{ steps.unit_tests.outcome || 'not run' }}"
+            echo "- APK build: ${{ steps.build_apk.outcome || 'not run' }}"
+            echo "- APK verification: ${{ steps.verify_apk.outcome || 'not run' }}"
+            echo
+            echo "## Available logs"
+            for LOG in "$CI_REPORT_DIR"/*.log "$CI_REPORT_DIR"/diagnostics.txt; do
+              [[ -f "$LOG" ]] || continue
+              echo
+              echo "### $(basename "$LOG")"
+              echo "~~~text"
+              tail -n 200 "$LOG"
+              echo "~~~"
+            done
+          } > "$REPORT"
+          cat "$REPORT"
+
+      - name: Upload build logs and error report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: TUR-BANK-BUILD-REPORT
+          path: ${{ github.workspace }}/ci-report/
+          if-no-files-found: warn
+          retention-days: 14
