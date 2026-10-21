@@ -436,8 +436,10 @@ private fun DashboardEntrance(
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit
 ) {
+    var entered by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) { entered = true }
     AnimatedVisibility(
-        visible = visible,
+        visible = visible && entered,
         modifier = modifier,
         enter = fadeIn(animationSpec = tween(durationMillis = 420, delayMillis = (index * 62).coerceAtMost(520), easing = FastOutSlowInEasing)) +
             slideInVertically(animationSpec = tween(durationMillis = 420, delayMillis = (index * 62).coerceAtMost(520), easing = FastOutSlowInEasing)) { it / 14 }
@@ -460,7 +462,7 @@ nav_marker = 'NavHost(navController = nav, startDestination = "home", modifier =
 nav_pos = source.find(nav_marker)
 if nav_pos < 0:
     raise SystemExit("Could not locate main navigation host.")
-nav_end = source.find("\n        }\n    ) { inner ->", nav_pos)
+nav_end = source.find("\n        }\n    }\n}", nav_pos)
 if nav_end < 0:
     raise SystemExit("Could not locate the end of the main navigation routes.")
 nav_block = source[nav_pos:nav_end]
