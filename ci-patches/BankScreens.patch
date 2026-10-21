@@ -1,0 +1,16 @@
+--- a/app/src/main/java/com/turbank/mobile/ui/BankScreens.kt
++++ b/app/src/main/java/com/turbank/mobile/ui/BankScreens.kt
+@@
+-    LaunchedEffect(message) {
+-        message?.let {
+-            snackbar.showSnackbar(message = localizeMessage(it))
+-            vm.dismissMessage()
+-        }
+-    }
++    val localizedMessage = message?.let { localizeMessage(it) }
++    LaunchedEffect(localizedMessage) {
++        localizedMessage?.let {
++            snackbar.showSnackbar(message = it)
++            vm.dismissMessage()
++        }
++    }
