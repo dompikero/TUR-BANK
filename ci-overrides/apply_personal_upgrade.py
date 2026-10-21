@@ -460,7 +460,7 @@ for rel, mapping in translations.items():
         if name not in mapping:
             return match.group(0)
         seen.add(name)
-        return match.group(1) + mapping[name] + match.group(4)
+        return match.group(1) + mapping[name].replace("'", "\\'") + match.group(4)
     content = string_re.sub(change_string, content)
     required = {"demo_warning", "reset_demo", "demo_user", "about_body", "receive_demo", "profile", "ledger_notice", "app_version"}
     missing = required - seen
