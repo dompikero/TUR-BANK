@@ -25,26 +25,54 @@ replacements = [
         '            "tr", "de" -> "Profil"\n'
         '            else -> "Profile"\n'
         '        }\n'
+        '        "finance-hub" -> when (settings.language) {\n'
+        '            "tr" -> "Finansal Merkez"\n'
+        '            "de" -> "Finanz-Cockpit"\n'
+        '            else -> "Finance Hub"\n'
+        '        }\n'
         '        else -> stringResource(R.string.settings)\n',
-        "profile screen title",
+        "profile and finance hub titles",
     ),
     (
         '                actions = {\n'
         '                    IconButton(onClick = { nav.navigate("notifications") { launchSingleTop = true } }) {\n',
         '                actions = {\n'
+        '                    IconButton(onClick = { nav.navigate("finance-hub") { launchSingleTop = true } }) {\n'
+        '                        Icon(Icons.Default.Analytics, contentDescription = "Finance Hub")\n'
+        '                    }\n'
         '                    IconButton(onClick = { nav.navigate("profile") { launchSingleTop = true } }) {\n'
         '                        Icon(Icons.Default.Person, contentDescription = "Profile")\n'
         '                    }\n'
         '                    IconButton(onClick = { nav.navigate("notifications") { launchSingleTop = true } }) {\n',
-        "profile toolbar shortcut",
+        "profile and finance hub toolbar shortcuts",
     ),
     (
         '            composable("notifications") { NotificationsScreen(vm, settings) }\n'
         '            composable("settings") { SettingsScreen(vm, settings) }\n',
         '            composable("notifications") { NotificationsScreen(vm, settings) }\n'
         '            composable("settings") { SettingsScreen(vm, settings) }\n'
-        '            composable("profile") { ProfileScreen(vm = vm, nav = nav) }\n',
-        "profile navigation route",
+        '            composable("profile") { ProfileScreen(vm = vm, nav = nav) }\n'
+        '            composable("finance-hub") { FinanceHubScreen(vm = vm, nav = nav, settings = settings) }\n',
+        "profile and finance hub navigation routes",
+    ),
+    (
+        '        Text(stringResource(R.string.display_currency_note), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)\n',
+        '        Card(\n'
+        '            modifier = Modifier.fillMaxWidth().clickable { nav.navigate("finance-hub") },\n'
+        '            shape = RoundedCornerShape(22.dp),\n'
+        '            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)\n'
+        '        ) {\n'
+        '            Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {\n'
+        '                Icon(Icons.Default.Analytics, contentDescription = null, tint = MaterialTheme.colorScheme.onPrimaryContainer, modifier = Modifier.size(28.dp))\n'
+        '                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {\n'
+        '                    Text("TUR BANK PLUS", fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.onPrimaryContainer)\n'
+        '                    Text(when (settings.language) { "tr" -> "Yeni finansal kontrol merkezi · bütçe · işlem arama · CSV ekstre"; "de" -> "Finanz-Cockpit · Budget · Umsatzsuche · CSV-Auszug"; else -> "Finance hub · budget · transaction search · CSV statement" }, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onPrimaryContainer)\n'
+        '                }\n'
+        '                Icon(Icons.Default.CreditCard, contentDescription = null, tint = MaterialTheme.colorScheme.onPrimaryContainer)\n'
+        '            }\n'
+        '        }\n'
+        '        Text(stringResource(R.string.display_currency_note), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)\n',
+        "home screen plus hub card",
     ),
     (
         '        cards.forEach { card ->\n'
@@ -97,4 +125,4 @@ for old, new, label in replacements:
     source = source.replace(old, new, 1)
 
 screen.write_text(source, encoding="utf-8")
-print("Applied profile route, local personal profile, distinct card themes and card-limit progress.")
+print("Applied profile route, finance hub, custom card themes, spending progress, CSV export and local personal finance tools.")
