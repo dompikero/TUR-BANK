@@ -1,0 +1,67 @@
+--- a/app/src/main/java/com/turbank/mobile/ui/BankScreens.kt
++++ b/app/src/main/java/com/turbank/mobile/ui/BankScreens.kt
+@@ -32,6 +32,7 @@
+ import androidx.compose.material.icons.filled.Tune
++import androidx.compose.material.icons.filled.Person
+ import androidx.compose.material.icons.filled.Wallet
+@@ -225,6 +226,11 @@
+         "receive" -> stringResource(R.string.receive_demo)
+         "notifications" -> stringResource(R.string.notifications)
++        "profile" -> when (settings.language) {
++            "tr", "de" -> "Profil"
++            else -> "Profile"
++        }
+         else -> stringResource(R.string.settings)
+@@ -249,6 +255,9 @@
+         },
+         actions = {
++            IconButton(onClick = { nav.navigate("profile") { launchSingleTop = true } }) {
++                Icon(Icons.Default.Person, contentDescription = "Profile")
++            }
+             IconButton(onClick = { nav.navigate("notifications") { launchSingleTop = true } }) {
+                 Icon(Icons.Default.Tune, contentDescription = stringResource(R.string.notifications))
+             }
+@@ -281,6 +290,7 @@
+             composable("receive") { ReceiveScreen(vm, settings) }
+             composable("notifications") { NotificationsScreen(vm, settings) }
+             composable("settings") { SettingsScreen(vm, settings) }
++            composable("profile") { ProfileScreen(vm = vm, nav = nav) }
+         }
+@@ -858,6 +868,14 @@
+     }
+     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+         Row(verticalAlignment = Alignment.CenterVertically) {
+@@
+         if (cards.isEmpty()) EmptyState(stringResource(R.string.no_items))
+         cards.forEach { card ->
++            val cardGradient = when (Math.floorMod(card.nickname.hashCode(), 4)) {
++                0 -> listOf(Color(0xFF10213F), Color(0xFF0077B6))
++                1 -> listOf(Color(0xFF3A0CA3), Color(0xFF7209B7))
++                2 -> listOf(Color(0xFF004D40), Color(0xFF16A085))
++                else -> listOf(Color(0xFF7F1D1D), Color(0xFFEA580C))
++            }
++            val limitProgress = if (card.limitMinor > 0L) (card.spentMinor.toFloat() / card.limitMinor.toFloat()).coerceIn(0f, 1f) else 0f
+             Card(
+                 shape = RoundedCornerShape(24.dp),
+-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primary),
++                colors = CardDefaults.cardColors(containerColor = cardGradient.first()),
+                 modifier = Modifier.fillMaxWidth()
+             ) {
+-                Column(Modifier.background(Brush.linearGradient(listOf(MaterialTheme.colorScheme.primary, Color(0xFF2E416D)))).padding(18.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
++                Column(Modifier.background(Brush.linearGradient(cardGradient)).padding(18.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+@@
+                     Row(verticalAlignment = Alignment.CenterVertically) {
+                         Column(Modifier.weight(1f)) {
+                             Text(card.nickname, color = Color.White, fontWeight = FontWeight.Bold)
+                             Text(stringResource(R.string.spent_limit) + ": " + Money.format(card.spentMinor, card.currencyCode, settings.language) + " / " + Money.format(card.limitMinor, card.currencyCode, settings.language), color = Color.White.copy(alpha = .8f), style = MaterialTheme.typography.bodySmall)
+                         }
+                         if (card.frozen) Text(stringResource(R.string.frozen_badge), color = MaterialTheme.colorScheme.secondary, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.labelMedium)
+                     }
++                    LinearProgressIndicator(
++                        progress = limitProgress,
++                        modifier = Modifier.fillMaxWidth().height(5.dp),
++                        color = MaterialTheme.colorScheme.secondary,
++                        trackColor = Color.White.copy(alpha = 0.22f)
++                    )
+                 }
+             }
