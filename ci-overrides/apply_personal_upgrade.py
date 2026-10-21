@@ -110,7 +110,7 @@ if "import com.turbank.mobile.ui.PersonalAccountSetupScreen" not in main:
     main = replace_once(
         main,
         "import com.turbank.mobile.ui.LanguageSelectionScreen",
-        "import com.turbank.mobile.ui.PersonalAccountSetupScreen\nimport com.turbank.mobile.ui.LocalPinSecurity",
+        "import com.turbank.mobile.ui.LanguageSelectionScreen\nimport com.turbank.mobile.ui.PersonalAccountSetupScreen\nimport com.turbank.mobile.ui.LocalPinSecurity",
         "setup screen imports"
     )
 if "var hasPersonalSetup by remember" not in main:
@@ -240,6 +240,8 @@ private fun appText(language: String, tr: String, en: String, de: String): Strin
     "de" -> de
     else -> en
 }
+
+private data class BottomItem(val route: String, val label: Int, val icon: androidx.compose.ui.graphics.vector.ImageVector)
 
 '''
 screens = screens[:lock_start] + lock_screen + screens[nav_start:]
