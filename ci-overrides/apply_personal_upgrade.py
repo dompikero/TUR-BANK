@@ -148,6 +148,13 @@ if "PersonalAccountSetupScreen(" not in main:
                     )
 '''
     main = replace_once(main, old_flow, new_flow, "welcome replacement")
+if "language = settings.language,\n                        showBiometric = settings.biometricPreference," not in main:
+    main = replace_once(
+        main,
+        'settings.lockOnRestart && !unlocked -> DemoLockScreen(\n                        showBiometric = settings.biometricPreference,',
+        'settings.lockOnRestart && !unlocked -> DemoLockScreen(\n                        language = settings.language,\n                        showBiometric = settings.biometricPreference,',
+        "pass selected language to PIN lock"
+    )
 main_file.write_text(main, encoding="utf-8")
 
 # QR camera scanner, and bumped version.
@@ -197,34 +204,34 @@ fun DemoLockScreen(language: String, showBiometric: Boolean, onUnlock: () -> Uni
         Text("TUR BANK", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.ExtraBold)
         Text(appText(language, "Hesabının kilidini aç", "Unlock your account", "Konto entsperren"), style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
         Spacer(Modifier.height(8.dp))
-        Text(appText("tr", "Kurulum sırasında oluşturduğun PIN'i gir.", "Enter the PIN you created during setup.", "Gib die bei der Einrichtung erstellte PIN ein."), color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(appText(language, "Kurulum sırasında oluşturduğun PIN'i gir.", "Enter the PIN you created during setup.", "Gib die bei der Einrichtung erstellte PIN ein."), color = MaterialTheme.colorScheme.onSurfaceVariant)
         Spacer(Modifier.height(20.dp))
         OutlinedTextField(
             value = pin,
             onValueChange = { pin = it.filter(Char::isDigit).take(6); wrong = false },
-            label = { Text(appText("tr", "Uygulama PIN'i", "App PIN", "App-PIN")) },
+            label = { Text(appText(language, "Uygulama PIN'i", "App PIN", "App-PIN")) },
             visualTransformation = PasswordVisualTransformation(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
             singleLine = true,
             modifier = Modifier.fillMaxWidth()
         )
-        if (wrong) Text(appText("tr", "PIN yanlış. Tekrar dene.", "Incorrect PIN. Try again.", "Falsche PIN. Bitte erneut versuchen."), color = MaterialTheme.colorScheme.error)
+        if (wrong) Text(appText(language, "PIN yanlış. Tekrar dene.", "Incorrect PIN. Try again.", "Falsche PIN. Bitte erneut versuchen."), color = MaterialTheme.colorScheme.error)
         Spacer(Modifier.height(16.dp))
         Button(
             onClick = { if (LocalPinSecurity.matches(pin, salt, expectedHash)) onUnlock() else wrong = true },
             enabled = pin.length in 4..6,
             modifier = Modifier.fillMaxWidth().height(52.dp)
-        ) { Text(appText("tr", "Kilidi aç", "Unlock", "Entsperren")) }
+        ) { Text(appText(language, "Kilidi aç", "Unlock", "Entsperren")) }
         if (showBiometric) {
             Spacer(Modifier.height(8.dp))
             OutlinedButton(onClick = onBiometricUnlock, modifier = Modifier.fillMaxWidth()) {
                 Icon(Icons.Default.Shield, contentDescription = null)
                 Spacer(Modifier.width(8.dp))
-                Text(appText("tr", "Cihaz güvenliğiyle aç", "Unlock with device security", "Mit Gerätesicherheit entsperren"))
+                Text(appText(language, "Cihaz güvenliğiyle aç", "Unlock with device security", "Mit Gerätesicherheit entsperren"))
             }
         }
         Spacer(Modifier.height(12.dp))
-        Text(appText("tr", "Kayıtların bu cihazda saklanır.", "Your records are stored on this device.", "Deine Daten werden auf diesem Gerät gespeichert."), color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodySmall)
+        Text(appText(language, "Kayıtların bu cihazda saklanır.", "Your records are stored on this device.", "Deine Daten werden auf diesem Gerät gespeichert."), color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodySmall)
     }
 }
 
