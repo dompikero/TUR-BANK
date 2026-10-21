@@ -30,14 +30,36 @@ if encoded_hub.is_file():
     if not hub_source.is_file() or hub_source.stat().st_size < 30000:
         raise SystemExit("Finance hub source did not decode to a complete Kotlin file.")
 
+academy_encoded = project / "app/src/main/java/com/turbank/mobile/ui/FinanceAcademyScreen.kt.gz.b64"
+academy_dir = academy_encoded.parent
+academy_parts = sorted(academy_dir.glob("academy_source.part[0-9][0-9]"))
+if academy_parts:
+    if len(academy_parts) != 5:
+        raise SystemExit(f"Expected 5 finance academy source parts, found {len(academy_parts)}")
+    academy_joined = "".join(part.read_text(encoding="ascii").strip() for part in academy_parts)
+    checksum = 2166136261
+    for character in academy_joined:
+        checksum = ((checksum ^ ord(character)) * 16777619) & 0xFFFFFFFF
+    if len(academy_joined) != 6596 or checksum != 0x0D41210A:
+        raise SystemExit(f"Finance academy source integrity check failed (length={len(academy_joined)}, checksum={checksum:#010x})")
+    academy_encoded.write_text(academy_joined, encoding="ascii")
+    for part in academy_parts:
+        part.unlink()
+if academy_encoded.is_file():
+    academy_source = project / "app/src/main/java/com/turbank/mobile/ui/FinanceAcademyScreen.kt"
+    academy_source.write_bytes(gzip.decompress(base64.b64decode(academy_encoded.read_text(encoding="ascii").strip())))
+    academy_encoded.unlink()
+    if academy_source.stat().st_size < 10000:
+        raise SystemExit("Finance academy screen did not decode to a complete Kotlin file.")
+
 build_file = project / "app/build.gradle.kts"
 build_text = build_file.read_text(encoding="utf-8")
 old_version = '        versionCode = 1\n        versionName = "1.0.0"'
-new_version = '        versionCode = 2\n        versionName = "1.1.0"'
+new_version = '        versionCode = 3\n        versionName = "1.2.0"'
 if old_version in build_text:
     build_file.write_text(build_text.replace(old_version, new_version, 1), encoding="utf-8")
 elif new_version not in build_text:
-    raise SystemExit("Could not safely bump app version for TUR BANK Plus.")
+    raise SystemExit("Could not safely bump app version for TUR BANK Plus 1.2.0.")
 
 screen = project / "app/src/main/java/com/turbank/mobile/ui/BankScreens.kt"
 if not screen.is_file():
@@ -47,7 +69,7 @@ source = screen.read_text(encoding="utf-8")
 replacements = [
     (
         'import androidx.compose.material.icons.filled.Tune\n',
-        'import androidx.compose.material.icons.filled.Tune\nimport androidx.compose.material.icons.filled.Person\n',
+        'import androidx.compose.material.icons.filled.Tune\nimport androidx.compose.material.icons.filled.Person\nimport androidx.compose.material.icons.filled.School\n',
         "profile icon import",
     ),
     (
@@ -62,6 +84,11 @@ replacements = [
         '            "de" -> "Finanz-Cockpit"\n'
         '            else -> "Finance Hub"\n'
         '        }\n'
+        '        "academy" -> when (settings.language) {\n'
+        '            "tr" -> "Finans Akademisi"\n'
+        '            "de" -> "Finanzakademie"\n'
+        '            else -> "Finance Academy"\n'
+        '        }\n'
         '        else -> stringResource(R.string.settings)\n',
         "profile and finance hub titles",
     ),
@@ -71,6 +98,9 @@ replacements = [
         '                actions = {\n'
         '                    IconButton(onClick = { nav.navigate("finance-hub") { launchSingleTop = true } }) {\n'
         '                        Icon(Icons.Default.Analytics, contentDescription = "Finance Hub")\n'
+        '                    }\n'
+        '                    IconButton(onClick = { nav.navigate("academy") { launchSingleTop = true } }) {\n'
+        '                        Icon(Icons.Default.School, contentDescription = "Finance Academy")\n'
         '                    }\n'
         '                    IconButton(onClick = { nav.navigate("profile") { launchSingleTop = true } }) {\n'
         '                        Icon(Icons.Default.Person, contentDescription = "Profile")\n'
@@ -84,7 +114,8 @@ replacements = [
         '            composable("notifications") { NotificationsScreen(vm, settings) }\n'
         '            composable("settings") { SettingsScreen(vm, settings) }\n'
         '            composable("profile") { ProfileScreen(vm = vm, nav = nav) }\n'
-        '            composable("finance-hub") { FinanceHubScreen(vm = vm, nav = nav, settings = settings) }\n',
+        '            composable("finance-hub") { FinanceHubScreen(vm = vm, nav = nav, settings = settings) }\n'
+        '            composable("academy") { FinanceAcademyScreen(nav = nav, settings = settings) }\n',
         "profile and finance hub navigation routes",
     ),
     (
