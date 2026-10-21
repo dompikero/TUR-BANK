@@ -78,7 +78,7 @@ replacements = [
         '                        if (card.frozen) Text(stringResource(R.string.frozen_badge), color = MaterialTheme.colorScheme.secondary, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.labelMedium)\n'
         '                    }\n'
         '                    LinearProgressIndicator(\n'
-        '                        progress = { limitProgress },\n'
+        '                        progress = limitProgress,\n'
         '                        modifier = Modifier.fillMaxWidth().height(5.dp),\n'
         '                        color = MaterialTheme.colorScheme.secondary,\n'
         '                        trackColor = Color.White.copy(alpha = 0.22f)\n'
