@@ -130,6 +130,22 @@ jobs:
             exit 1
           fi
 
+      - name: Apply TUR BANK Plus UI overlays
+        id: plus_ui
+        shell: bash
+        run: |
+          set -euo pipefail
+          OVERLAY_DIR="$GITHUB_WORKSPACE/ci-overrides/app"
+          if [[ ! -d "$OVERLAY_DIR" ]]; then
+            echo "::error::Plus UI overlay folder is missing."
+            exit 1
+          fi
+          cp -a "$OVERLAY_DIR/." "$PROJECT_DIR/app/"
+          python3 "$GITHUB_WORKSPACE/ci-overrides/apply_plus_ui.py" "$PROJECT_DIR"
+          test -f "$PROJECT_DIR/app/src/main/java/com/turbank/mobile/ui/ProfileScreen.kt"
+          grep -Fq 'composable("profile")' "$PROJECT_DIR/app/src/main/java/com/turbank/mobile/ui/BankScreens.kt"
+          echo "Added local profile and enhanced virtual card UI." | tee "$CI_REPORT_DIR/plus-ui.log"
+
       - name: Set up JDK 17
         id: setup_java
         uses: actions/setup-java@v5
