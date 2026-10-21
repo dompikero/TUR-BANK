@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -98,7 +99,7 @@ fun ProfileScreen(vm: BankViewModel, nav: NavHostController) {
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
                         Box(
-                            modifier = Modifier.sizeAvatar().clip(CircleShape).background(Color.White.copy(alpha = 0.18f)),
+                            modifier = Modifier.size(66.dp).clip(CircleShape).background(Color.White.copy(alpha = 0.18f)),
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
@@ -345,4 +346,3 @@ private fun ProfileToggleRow(label: String, checked: Boolean, onCheckedChange: (
     }
 }
 
-private fun Modifier.sizeAvatar(): Modifier = this.then(Modifier.padding(0.dp).let { Modifier.size(66.dp) })
