@@ -145,9 +145,11 @@ jobs:
           python3 "$GITHUB_WORKSPACE/ci-overrides/apply_card_plus.py" "$PROJECT_DIR"
           test -f "$PROJECT_DIR/app/src/main/java/com/turbank/mobile/ui/ProfileScreen.kt"
           test -f "$PROJECT_DIR/app/src/main/java/com/turbank/mobile/ui/FinanceHubScreen.kt"
+          test -f "$PROJECT_DIR/app/src/main/java/com/turbank/mobile/ui/FinanceAcademyScreen.kt"
           grep -Fq 'composable("profile")' "$PROJECT_DIR/app/src/main/java/com/turbank/mobile/ui/BankScreens.kt"
           grep -Fq 'composable("finance-hub")' "$PROJECT_DIR/app/src/main/java/com/turbank/mobile/ui/BankScreens.kt"
-          echo "Added personal profile, finance hub, account/card quick creation, and enhanced virtual card UI." | tee "$CI_REPORT_DIR/plus-ui.log"
+          grep -Fq 'composable("academy")' "$PROJECT_DIR/app/src/main/java/com/turbank/mobile/ui/BankScreens.kt"
+          echo "Added personal profile, finance hub, offline academy, account/card quick creation, and enhanced virtual card UI." | tee "$CI_REPORT_DIR/plus-ui.log"
 
       - name: Remove synthetic APK size filler
         id: remove_synthetic_asset
@@ -163,6 +165,46 @@ jobs:
             echo "No synthetic size filler found; packaging only real app resources." | tee -a "$CI_REPORT_DIR/source-fixes.log"
           fi
           test ! -e "$ASSET"
+
+      - name: Generate offline finance academy videos
+        id: academy_media
+        shell: bash
+        run: |
+          set -euo pipefail
+          ACADEMY_DIR="$GITHUB_WORKSPACE/ci-overrides"
+          GENERATOR="$RUNNER_TEMP/generate_finance_academy.py"
+          python3 - "$ACADEMY_DIR" "$GENERATOR" <<'PY'
+          import base64, gzip, sys
+          from pathlib import Path
+          root, output = Path(sys.argv[1]), Path(sys.argv[2])
+          parts = sorted(root.glob("academy_generator.part[0-9][0-9]"))
+          if len(parts) != 6:
+              raise SystemExit(f"Expected 6 academy generator parts, found {len(parts)}")
+          encoded = "".join(p.read_text(encoding="ascii").strip() for p in parts)
+          if len(encoded) != 7544:
+              raise SystemExit(f"Academy generator package length mismatch: {len(encoded)}")
+          checksum = 2166136261
+          for character in encoded:
+              checksum = ((checksum ^ ord(character)) * 16777619) & 0xFFFFFFFF
+          if checksum != 0xCDB4EA76:
+              raise SystemExit(f"Academy generator checksum mismatch: {checksum:#010x}")
+          output.write_bytes(gzip.decompress(base64.b64decode(encoded)))
+          print(f"Verified and unpacked generator: {output.stat().st_size} bytes")
+          PY
+          if ! command -v ffmpeg >/dev/null 2>&1 || ! (command -v espeak-ng >/dev/null 2>&1 || command -v espeak >/dev/null 2>&1) || ! python3 -c 'from PIL import Image' >/dev/null 2>&1; then
+            sudo apt-get update -qq
+            sudo apt-get install -y ffmpeg espeak-ng python3-pil
+          fi
+          python3 "$GENERATOR" "$PROJECT_DIR" 2>&1 | tee "$CI_REPORT_DIR/academy-media.log"
+          for lesson in budgeting card_security savings fraud_prevention; do
+            test -s "$PROJECT_DIR/app/src/main/assets/academy/$lesson.mp4"
+          done
+          MEDIA_BYTES="$(find "$PROJECT_DIR/app/src/main/assets/academy" -maxdepth 1 -type f -name '*.mp4' -printf '%s\n' | awk '{s+=$1} END {print s+0}')"
+          echo "Bundled offline academy media: $MEDIA_BYTES bytes" | tee -a "$CI_REPORT_DIR/academy-media.log"
+          if (( MEDIA_BYTES < 90000000 )); then
+            echo "::error::Offline lesson package is unexpectedly small: $MEDIA_BYTES bytes"
+            exit 1
+          fi
 
       - name: Set up JDK 17
         id: setup_java
@@ -271,9 +313,28 @@ jobs:
             echo "::error::Build finished without the expected APK at $APK_PATH"
             exit 1
           fi
+          APK_BYTES="$(stat -c '%s' "$APK_PATH")"
+          if (( APK_BYTES <= 100000000 )); then
+            echo "::error::TUR BANK PLUS APK must exceed 100 MB. Actual bytes: $APK_BYTES"
+            exit 1
+          fi
+          APK_ENTRIES="$(unzip -Z1 "$APK_PATH")"
+          for lesson in budgeting card_security savings fraud_prevention; do
+            if ! grep -Fxq "assets/academy/$lesson.mp4" <<< "$APK_ENTRIES"; then
+              echo "::error::Offline academy video is missing from APK: $lesson.mp4"
+              exit 1
+            fi
+          done
+          if grep -Fq 'tur-bank-large-demo-pack.bin' <<< "$APK_ENTRIES"; then
+            echo "::error::Synthetic APK size filler must not be packaged."
+            exit 1
+          fi
           {
             echo "APK path: $APK_PATH"
-            echo "APK size: $(stat -c '%s bytes' "$APK_PATH")"
+            echo "APK size: $APK_BYTES bytes"
+            echo "APK size in MiB: $(awk -v b="$APK_BYTES" 'BEGIN {printf "%.2f", b/1048576}')"
+            echo "Version: 1.2.0"
+            echo "Bundled offline academy lessons: 4"
             echo "SHA-256: $(sha256sum "$APK_PATH" | awk '{print $1}')"
           } | tee "$CI_REPORT_DIR/apk-verification.txt"
 
