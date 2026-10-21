@@ -271,12 +271,6 @@ screens = replace_once(
     'Text(appText(settings.language, "Kişisel finans alanın", "Your personal finance space", "Dein persönlicher Finanzbereich"), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)',
     "remove test banner"
 )
-top_pos = screens.find("topBar = {")
-action_start = screens.find("                actions = {", top_pos)
-action_marker = "\n                }\n            }\n        },\n        snackbarHost"
-action_end = screens.find(action_marker, action_start)
-if top_pos < 0 or action_start < 0 or action_end < 0:
-    raise SystemExit("Could not isolate top-bar actions.")
 actions = '''                actions = {
                     IconButton(onClick = { nav.navigate("qr-pay") { launchSingleTop = true } }) {
                         Icon(Icons.Default.QrCode2, contentDescription = appText(settings.language, "QR ile ödeme", "QR payments", "QR-Zahlung"))
@@ -288,7 +282,10 @@ actions = '''                actions = {
                         Icon(Icons.Default.Notifications, contentDescription = stringResource(R.string.notifications))
                     }
                 }'''
-screens = screens[:action_start] + actions + screens[action_end + len("\n                }"):]
+screens, action_count = re.subn(r'(?s)                actions = \{.*?\n                \}', actions, screens, count=1)
+if action_count != 1:
+    raise SystemExit(f"Could not replace top-bar actions using balanced indentation (count={action_count}).")
+
 
 # The feature directory should be a polished grid, not the old long list.
 tools_route_old = 'composable("tools") { RouteEntrance { ToolsScreen(settings) } }'
