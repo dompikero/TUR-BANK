@@ -29,13 +29,13 @@ replacements = [
         "profile screen title",
     ),
     (
-        '        actions = {\n'
-        '            IconButton(onClick = { nav.navigate("notifications") { launchSingleTop = true } }) {\n',
-        '        actions = {\n'
-        '            IconButton(onClick = { nav.navigate("profile") { launchSingleTop = true } }) {\n'
-        '                Icon(Icons.Default.Person, contentDescription = "Profile")\n'
-        '            }\n'
-        '            IconButton(onClick = { nav.navigate("notifications") { launchSingleTop = true } }) {\n',
+        '                actions = {\n'
+        '                    IconButton(onClick = { nav.navigate("notifications") { launchSingleTop = true } }) {\n',
+        '                actions = {\n'
+        '                    IconButton(onClick = { nav.navigate("profile") { launchSingleTop = true } }) {\n'
+        '                        Icon(Icons.Default.Person, contentDescription = "Profile")\n'
+        '                    }\n'
+        '                    IconButton(onClick = { nav.navigate("notifications") { launchSingleTop = true } }) {\n',
         "profile toolbar shortcut",
     ),
     (
