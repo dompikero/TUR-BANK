@@ -245,8 +245,8 @@ private data class BottomItem(val route: String, val label: Int, val icon: andro
 
 '''
 screens = screens[:lock_start] + lock_screen + screens[nav_start:]
-nav_signature = "@Composable\\nfun MainBankNavigation(vm: BankViewModel)"
-nav_annotated = "@OptIn(ExperimentalMaterial3Api::class)\\n" + nav_signature
+nav_signature = "@Composable" + chr(10) + "fun MainBankNavigation(vm: BankViewModel)"
+nav_annotated = "@OptIn(ExperimentalMaterial3Api::class)" + chr(10) + nav_signature
 if nav_annotated not in screens:
     screens = replace_once(screens, nav_signature, nav_annotated, "restore Material 3 API opt-in")
 
