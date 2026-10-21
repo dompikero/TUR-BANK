@@ -109,7 +109,7 @@ main = main_file.read_text(encoding="utf-8")
 if "import com.turbank.mobile.ui.PersonalAccountSetupScreen" not in main:
     main = replace_once(
         main,
-        "import com.turbank.mobile.ui.WelcomeScreen",
+        "import com.turbank.mobile.ui.LanguageSelectionScreen",
         "import com.turbank.mobile.ui.PersonalAccountSetupScreen\nimport com.turbank.mobile.ui.LocalPinSecurity",
         "setup screen imports"
     )
