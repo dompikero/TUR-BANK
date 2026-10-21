@@ -142,6 +142,7 @@ jobs:
           fi
           cp -a "$OVERLAY_DIR/." "$PROJECT_DIR/app/"
           python3 "$GITHUB_WORKSPACE/ci-overrides/apply_plus_ui.py" "$PROJECT_DIR"
+          python3 "$GITHUB_WORKSPACE/ci-overrides/apply_card_plus.py" "$PROJECT_DIR"
           test -f "$PROJECT_DIR/app/src/main/java/com/turbank/mobile/ui/ProfileScreen.kt"
           grep -Fq 'composable("profile")' "$PROJECT_DIR/app/src/main/java/com/turbank/mobile/ui/BankScreens.kt"
           echo "Added local profile and enhanced virtual card UI." | tee "$CI_REPORT_DIR/plus-ui.log"
