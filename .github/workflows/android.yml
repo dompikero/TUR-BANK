@@ -105,6 +105,31 @@ jobs:
           } | tee -a "$CI_REPORT_DIR/project-discovery.log"
           printf '\nProject path: %s\n' "$PROJECT_DIR" >> "$CI_REPORT_DIR/diagnostics.txt"
 
+      - name: Apply source compilation fix
+        id: apply_source_fix
+        shell: bash
+        run: |
+          set -euo pipefail
+          TARGET="$PROJECT_DIR/app/src/main/java/com/turbank/mobile/ui/BankScreens.kt"
+          if [[ ! -f "$TARGET" ]]; then
+            echo "::error::Expected Kotlin screen file not found: $TARGET"
+            exit 1
+          fi
+          if grep -Fq 'snackbar.showSnackbar(message = localizeMessage(it))' "$TARGET"; then
+            if [[ ! -f "$GITHUB_WORKSPACE/ci-patches/BankScreens.patch" ]]; then
+              echo "::error::Known Compose fix patch is missing."
+              exit 1
+            fi
+            patch --batch --forward -p1 -d "$PROJECT_DIR" < "$GITHUB_WORKSPACE/ci-patches/BankScreens.patch"
+            echo "Applied Compose snackbar localization fix." | tee "$CI_REPORT_DIR/source-fixes.log"
+          elif grep -Fq 'val localizedMessage = message?.let { localizeMessage(it) }' "$TARGET"; then
+            echo "Compose snackbar localization fix is already present." | tee "$CI_REPORT_DIR/source-fixes.log"
+          else
+            echo "Unexpected BankScreens.kt content; refusing to guess a patch." | tee "$CI_REPORT_DIR/source-fixes.log"
+            echo "::error::Could not identify the expected snackbar code."
+            exit 1
+          fi
+
       - name: Set up JDK 17
         id: setup_java
         uses: actions/setup-java@v5
@@ -225,6 +250,7 @@ jobs:
             echo
             echo '## Step outcomes'
             echo "- Project discovery: ${{ steps.locate_project.outcome || 'not run' }}"
+            echo "- Source fix: ${{ steps.apply_source_fix.outcome || 'not run' }}"
             echo "- JDK setup: ${{ steps.setup_java.outcome || 'not run' }}"
             echo "- Gradle setup: ${{ steps.setup_gradle.outcome || 'not run' }}"
             echo "- Android SDK setup: ${{ steps.setup_android.outcome || 'not run' }}"
