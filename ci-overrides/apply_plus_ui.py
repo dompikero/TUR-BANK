@@ -1,12 +1,30 @@
 #!/usr/bin/env python3
 """Apply additive TUR BANK Plus UI changes to the extracted Android source."""
 from pathlib import Path
+import base64
+import gzip
 import sys
 
 if len(sys.argv) != 2:
     raise SystemExit("usage: apply_plus_ui.py PROJECT_DIR")
 
 project = Path(sys.argv[1])
+encoded_hub = project / "app/src/main/java/com/turbank/mobile/ui/FinanceHubScreen.kt.gz.b64"
+if encoded_hub.is_file():
+    hub_source = project / "app/src/main/java/com/turbank/mobile/ui/FinanceHubScreen.kt"
+    hub_source.parent.mkdir(parents=True, exist_ok=True)
+    hub_source.write_bytes(gzip.decompress(base64.b64decode(encoded_hub.read_text(encoding="ascii").strip())))
+    encoded_hub.unlink()
+
+build_file = project / "app/build.gradle.kts"
+build_text = build_file.read_text(encoding="utf-8")
+old_version = '        versionCode = 1\n        versionName = "1.0.0"'
+new_version = '        versionCode = 2\n        versionName = "1.1.0"'
+if old_version in build_text:
+    build_file.write_text(build_text.replace(old_version, new_version, 1), encoding="utf-8")
+elif new_version not in build_text:
+    raise SystemExit("Could not safely bump app version for TUR BANK Plus.")
+
 screen = project / "app/src/main/java/com/turbank/mobile/ui/BankScreens.kt"
 if not screen.is_file():
     raise SystemExit(f"BankScreens.kt not found: {screen}")
