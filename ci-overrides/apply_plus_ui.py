@@ -10,11 +10,25 @@ if len(sys.argv) != 2:
 
 project = Path(sys.argv[1])
 encoded_hub = project / "app/src/main/java/com/turbank/mobile/ui/FinanceHubScreen.kt.gz.b64"
+hub_dir = encoded_hub.parent
+segments = sorted(hub_dir.glob("finance_hub_source.part[0-9][0-9]"))
+if segments:
+    if len(segments) != 7:
+        raise SystemExit(f"Expected 7 finance hub source segments, found {len(segments)}")
+    joined = "".join(part.read_text(encoding="ascii").strip() for part in segments)
+    if len(joined) != 10780:
+        raise SystemExit(f"Finance hub source package has unexpected length: {len(joined)}")
+    encoded_hub.write_text(joined, encoding="ascii")
+    for part in segments:
+        part.unlink()
 if encoded_hub.is_file():
     hub_source = project / "app/src/main/java/com/turbank/mobile/ui/FinanceHubScreen.kt"
     hub_source.parent.mkdir(parents=True, exist_ok=True)
-    hub_source.write_bytes(gzip.decompress(base64.b64decode(encoded_hub.read_text(encoding="ascii").strip())))
+    decoded = gzip.decompress(base64.b64decode(encoded_hub.read_text(encoding="ascii").strip()))
+    hub_source.write_bytes(decoded)
     encoded_hub.unlink()
+    if not hub_source.is_file() or hub_source.stat().st_size < 30000:
+        raise SystemExit("Finance hub source did not decode to a complete Kotlin file.")
 
 build_file = project / "app/build.gradle.kts"
 build_text = build_file.read_text(encoding="utf-8")
