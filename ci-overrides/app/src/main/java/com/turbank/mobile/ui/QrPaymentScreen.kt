@@ -27,6 +27,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBalanceWallet
 import androidx.compose.material.icons.filled.QrCode2
 import androidx.compose.material3.Button
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilterChip
@@ -106,8 +108,50 @@ private fun paymentQrBitmap(contents: String): Bitmap? = runCatching {
     }
 }.getOrNull()
 
+
 @Composable
-fun QrPaymentScreen(vm: BankViewModel, nav: NavHostController?, settings: UserSettings) {
+private fun QrSectionHeading(title: String) {
+    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(9.dp), modifier = Modifier.fillMaxWidth()) {
+        Box(Modifier.size(width = 4.dp, height = 23.dp).clip(RoundedCornerShape(8.dp)).background(MaterialTheme.colorScheme.primary))
+        Text(title, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.Bold)
+    }
+}
+
+@Composable
+private fun QrChoiceField(label: String, options: List<Pair<String, String>>, selected: String, onSelect: (String) -> Unit) {
+    var expanded by remember { mutableStateOf(false) }
+    val selectedLabel = options.firstOrNull { it.first == selected }?.second
+        ?: qrText("tr", "Hesap seç", "Choose account", "Konto wählen")
+    Box(Modifier.fillMaxWidth()) {
+        OutlinedButton(onClick = { expanded = true }, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp)) {
+            Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(3.dp)) {
+                Text(label, color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.labelSmall)
+                Text(selectedLabel, color = MaterialTheme.colorScheme.onSurface, style = MaterialTheme.typography.bodyLarge)
+            }
+        }
+        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+            options.forEach { option ->
+                DropdownMenuItem(
+                    text = { Text(option.second) },
+                    onClick = { onSelect(option.first); expanded = false }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun QrEmptyState(text: String) {
+    Card(shape = RoundedCornerShape(20.dp), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)) {
+        Column(Modifier.fillMaxWidth().padding(22.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Icon(Icons.Default.QrCode2, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(34.dp))
+            Text(text, color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodyMedium)
+        }
+    }
+}
+
+@Composable
+fun QrPaymentScreen(vm: BankViewModel, settings: UserSettings) {
     val accounts by vm.accounts.collectAsState()
     val working by vm.working.collectAsState()
     val context = LocalContext.current
@@ -183,8 +227,8 @@ fun QrPaymentScreen(vm: BankViewModel, nav: NavHostController?, settings: UserSe
         }
 
         if (mode == "pay") {
-            SectionHeading(qrText(settings.language, "Ödeme bilgileri", "Payment details", "Zahlungsdetails"))
-            ChoiceField(qrText(settings.language, "Gönderen hesabın", "Pay from account", "Konto für Zahlung"), accounts.map { it.id to (it.name + " · " + it.currencyCode) }, sourceAccountId, { sourceAccountId = it })
+            QrSectionHeading(qrText(settings.language, "Ödeme bilgileri", "Payment details", "Zahlungsdetails"))
+            QrChoiceField(qrText(settings.language, "Gönderen hesabın", "Pay from account", "Konto für Zahlung"), accounts.map { it.id to (it.name + " · " + it.currencyCode) }, sourceAccountId, { sourceAccountId = it })
             OutlinedTextField(value = recipient, onValueChange = { recipient = it.take(100) }, label = { Text(qrText(settings.language, "Alıcı adı", "Recipient", "Empfänger")) }, singleLine = true, modifier = Modifier.fillMaxWidth())
             OutlinedTextField(
                 value = amount, onValueChange = { amount = it.filter { ch -> ch.isDigit() || ch == '.' || ch == ',' }.take(15) },
@@ -261,7 +305,7 @@ fun QrPaymentScreen(vm: BankViewModel, nav: NavHostController?, settings: UserSe
                     Text(qrText(settings.language, "Yeni referans üret", "Generate new reference", "Neue Referenz erzeugen"))
                 }
             } else {
-                EmptyState(qrText(settings.language, "QR oluşturmak için geçerli bir tutar gir.", "Enter a valid amount to create a QR.", "Gib einen gültigen Betrag ein, um einen QR-Code zu erstellen."))
+                QrEmptyState(qrText(settings.language, "QR oluşturmak için geçerli bir tutar gir.", "Enter a valid amount to create a QR.", "Gib einen gültigen Betrag ein, um einen QR-Code zu erstellen."))
             }
         }
         Text(
