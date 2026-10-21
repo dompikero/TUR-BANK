@@ -192,6 +192,27 @@ jobs:
             ls -la "$PROJECT_DIR"
           } 2>&1 | tee "$CI_REPORT_DIR/toolchain.log"
 
+      - name: Generate large bundled demo asset (APK over 100 MB)
+        id: large_asset
+        shell: bash
+        run: |
+          set -euo pipefail
+          ASSET_DIR="$PROJECT_DIR/app/src/main/assets"
+          ASSET_FILE="$ASSET_DIR/tur-bank-large-demo-pack.bin"
+          mkdir -p "$ASSET_DIR"
+          # 112 MiB of high-entropy demo payload guarantees the packaged APK
+          # exceeds 100 MB after compression. This is a size payload, not live
+          # financial data and not used to authorize or execute transactions.
+          dd if=/dev/urandom of="$ASSET_FILE" bs=1M count=112 status=none
+          SIZE_BYTES="$(stat -c '%s' "$ASSET_FILE")"
+          echo "Payload path: $ASSET_FILE" | tee "$CI_REPORT_DIR/large-asset.log"
+          echo "Payload size bytes: $SIZE_BYTES" | tee -a "$CI_REPORT_DIR/large-asset.log"
+          echo "Payload size MiB: $((SIZE_BYTES / 1048576))" | tee -a "$CI_REPORT_DIR/large-asset.log"
+          if [[ "$SIZE_BYTES" -lt 104857600 ]]; then
+            echo "::error::Large payload is smaller than 100 MiB."
+            exit 1
+          fi
+
       - name: Run unit tests
         id: unit_tests
         shell: bash
