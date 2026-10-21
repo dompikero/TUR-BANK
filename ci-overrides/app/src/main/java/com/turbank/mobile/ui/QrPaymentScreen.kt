@@ -268,8 +268,8 @@ fun QrPaymentScreen(vm: BankViewModel, settings: UserSettings) {
                 modifier = Modifier.fillMaxWidth().height(54.dp), shape = RoundedCornerShape(17.dp)
             ) { Text(qrText(settings.language, "Ödemeyi kaydet", "Record payment", "Zahlung erfassen")) }
         } else {
-            SectionHeading(qrText(settings.language, "Ödeme isteğin", "Your payment request", "Deine Zahlungsanfrage"))
-            ChoiceField(qrText(settings.language, "Ödeme alacağın hesap", "Receive to account", "Empfangskonto"), accounts.map { it.id to (it.name + " · " + it.currencyCode) }, requestAccountId, { requestAccountId = it })
+            QrSectionHeading(qrText(settings.language, "Ödeme isteğin", "Your payment request", "Deine Zahlungsanfrage"))
+            QrChoiceField(qrText(settings.language, "Ödeme alacağın hesap", "Receive to account", "Empfangskonto"), accounts.map { it.id to (it.name + " · " + it.currencyCode) }, requestAccountId, { requestAccountId = it })
             OutlinedTextField(
                 value = requestAmount, onValueChange = { requestAmount = it.filter { ch -> ch.isDigit() || ch == '.' || ch == ',' }.take(15) },
                 label = { Text(qrText(settings.language, "İstenen tutar", "Requested amount", "Angeforderter Betrag")) },
