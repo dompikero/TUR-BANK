@@ -199,8 +199,8 @@ jobs:
           set -euo pipefail
           REPORT="$CI_REPORT_DIR/source-inspection.txt"
           {
-            echo "=== KOTLIN FILES ==="
-            find "$PROJECT_DIR/app/src/main" -type f \\( -name '*.kt' -o -name '*.xml' \\) -print | sort
+            echo "=== SOURCE FILES ==="
+            find "$PROJECT_DIR/app/src/main" -type f -print | grep -E '\\.(kt|xml)$' | sort
             echo
             while IFS= read -r FILE; do
               case "$FILE" in
@@ -210,7 +210,7 @@ jobs:
                   sed -n '1,360p' "$FILE"
                   ;;
               esac
-            done < <(find "$PROJECT_DIR/app/src/main" -type f \\( -name '*.kt' -o -name '*.xml' \\) | sort)
+            done < <(find "$PROJECT_DIR/app/src/main" -type f -print | grep -E '\\.(kt|xml)$' | sort)
           } | tee "$REPORT"
 
       - name: Run unit tests
