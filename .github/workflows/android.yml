@@ -144,8 +144,25 @@ jobs:
           python3 "$GITHUB_WORKSPACE/ci-overrides/apply_plus_ui.py" "$PROJECT_DIR"
           python3 "$GITHUB_WORKSPACE/ci-overrides/apply_card_plus.py" "$PROJECT_DIR"
           test -f "$PROJECT_DIR/app/src/main/java/com/turbank/mobile/ui/ProfileScreen.kt"
+          test -f "$PROJECT_DIR/app/src/main/java/com/turbank/mobile/ui/FinanceHubScreen.kt"
           grep -Fq 'composable("profile")' "$PROJECT_DIR/app/src/main/java/com/turbank/mobile/ui/BankScreens.kt"
-          echo "Added local profile and enhanced virtual card UI." | tee "$CI_REPORT_DIR/plus-ui.log"
+          grep -Fq 'composable("finance-hub")' "$PROJECT_DIR/app/src/main/java/com/turbank/mobile/ui/BankScreens.kt"
+          echo "Added personal profile, finance hub, account/card quick creation, and enhanced virtual card UI." | tee "$CI_REPORT_DIR/plus-ui.log"
+
+      - name: Remove synthetic APK size filler
+        id: remove_synthetic_asset
+        shell: bash
+        run: |
+          set -euo pipefail
+          ASSET="$PROJECT_DIR/app/src/main/assets/tur-bank-large-demo-pack.bin"
+          if [[ -f "$ASSET" ]]; then
+            BYTES="$(stat -c '%s' "$ASSET")"
+            rm -f "$ASSET"
+            echo "Removed synthetic asset: $BYTES bytes." | tee -a "$CI_REPORT_DIR/source-fixes.log"
+          else
+            echo "No synthetic size filler found; packaging only real app resources." | tee -a "$CI_REPORT_DIR/source-fixes.log"
+          fi
+          test ! -e "$ASSET"
 
       - name: Set up JDK 17
         id: setup_java
