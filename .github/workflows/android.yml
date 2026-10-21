@@ -204,10 +204,10 @@ jobs:
             echo
             while IFS= read -r FILE; do
               case "$FILE" in
-                */MainActivity.kt|*/BankScreens.kt|*/MainViewModel.kt|*/BankViewModel.kt|*/AndroidManifest.xml)
+                */MainActivity.kt|*/BankScreens.kt|*/MainViewModel.kt|*/BankViewModel.kt|*/AndroidManifest.xml|*/Entities.kt|*/BankRepository.kt|*/PreferencesRepository.kt|*/BankDatabase.kt|*/values/strings.xml|*/values-tr/strings.xml|*/values-de/strings.xml)
                   echo
                   echo "=== $FILE ==="
-                  sed -n '1,360p' "$FILE"
+                  sed -n '1,1200p' "$FILE"
                   ;;
               esac
             done < <(find "$PROJECT_DIR/app/src/main" -type f -print | grep -E '[.](kt|xml)$' | sort)
