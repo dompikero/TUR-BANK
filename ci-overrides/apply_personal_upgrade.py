@@ -13,6 +13,7 @@ src = app / "src/main/java/com/turbank/mobile"
 ui = src / "ui"
 db_file = src / "data/BankDatabase.kt"
 repo_file = src / "data/BankRepository.kt"
+entities_file = src / "data/Entities.kt"
 vm_file = src / "BankViewModel.kt"
 main_file = src / "MainActivity.kt"
 screens_file = ui / "BankScreens.kt"
@@ -83,7 +84,51 @@ repo_code = '''    suspend fun seedIfNeeded() = db.withTransaction {
 
 '''
 repo = repo[:seed_start] + repo_code + repo[create_start:]
+repo = repo.replace('description.ifBlank { "Demo transfer" }', 'description.ifBlank { "Transfer" }')
+repo = repo.replace('title = "Demo transfer complete"', 'title = "Transfer recorded"')
+repo = repo.replace('body = "A demo payment to $label was recorded. No real money moved."', 'body = "Activity was recorded locally for $label."')
+funds_start = repo.find("    suspend fun receiveDemoMoney(")
+funds_end = repo.find("    suspend fun createGoal(", funds_start)
+if funds_start < 0 or funds_end < 0 or funds_end <= funds_start:
+    raise SystemExit("Could not isolate incoming-funds repository operation.")
+funds_method = '''    suspend fun addFunds(
+        accountId: String,
+        amountMinor: Long,
+        sender: String,
+        description: String
+    ): TransferResult = db.withTransaction {
+        if (amountMinor <= 0) return@withTransaction TransferResult.Failure("invalid_amount")
+        val account = db.accounts().getById(accountId)
+            ?: return@withTransaction TransferResult.Failure("source_missing")
+        if (account.balanceMinor > Long.MAX_VALUE - amountMinor) {
+            return@withTransaction TransferResult.Failure("invalid_amount")
+        }
+        val id = UUID.randomUUID().toString()
+        db.accounts().setBalance(account.id, account.balanceMinor + amountMinor)
+        db.transactions().insert(TransactionEntity(
+            id = id,
+            accountId = account.id,
+            recipient = sender.ifBlank { "Manual entry" },
+            amountMinor = amountMinor,
+            direction = "IN",
+            category = "Deposit",
+            description = description.ifBlank { "Balance entry" },
+            operationId = id
+        ))
+        db.notifications().insert(AppNotificationEntity(
+            title = "Balance updated",
+            body = "A balance entry was recorded locally for " + account.name + "."
+        ))
+        TransferResult.Success(id)
+    }
+
+'''
+repo = repo[:funds_start] + funds_method + repo[funds_end:]
 repo_file.write_text(repo, encoding="utf-8")
+
+entities = entities_file.read_text(encoding="utf-8")
+entities = entities.replace('val reference: String = "DEMO-" + UUID.randomUUID().toString().take(6).uppercase()', 'val reference: String = "TUR-" + UUID.randomUUID().toString().take(6).uppercase()')
+entities_file.write_text(entities, encoding="utf-8")
 
 # Create a named personal account before switching into the application.
 vm = vm_file.read_text(encoding="utf-8")
@@ -102,10 +147,29 @@ vm_method = '''    fun completePersonalSetup(accountName: String, type: String, 
 '''
 if "fun completePersonalSetup(" not in vm:
     vm = replace_once(vm, vm_anchor, vm_method + vm_anchor, "personal account setup method")
+funds_start = vm.find("    fun receiveDemoMoney(")
+funds_end = vm.find("    fun createGoal(", funds_start)
+if funds_start < 0 or funds_end < 0 or funds_end <= funds_start:
+    raise SystemExit("Could not isolate incoming-funds view model operation.")
+vm_funds = '''    fun addFunds(accountId: String, amountMinor: Long?, sender: String, description: String) {
+        val amount = amountMinor ?: run { _message.value = "invalid_amount"; return }
+        perform {
+            when (val result = repository.addFunds(accountId, amount, sender, description)) {
+                is TransferResult.Success -> "receive_success"
+                is TransferResult.Failure -> result.reason
+            }
+        }
+    }
+
+'''
+vm = vm[:funds_start] + vm_funds + vm[funds_end:]
 vm_file.write_text(vm, encoding="utf-8")
 
 # Language selection is followed by the new local profile + account setup, including a unique PIN hash.
 main = main_file.read_text(encoding="utf-8")
+main = main.replace("com.turbank.mobile.ui.DemoLockScreen", "com.turbank.mobile.ui.AccountLockScreen")
+main = main.replace("DemoLockScreen(", "AccountLockScreen(")
+main = main.replace("the demo remains locked.", "the app remains locked.")
 if "import com.turbank.mobile.ui.PersonalAccountSetupScreen" not in main:
     main = replace_once(
         main,
@@ -163,15 +227,19 @@ if 'implementation("com.journeyapps:zxing-android-embedded:4.3.0")' not in gradl
     gradle = replace_once(gradle, "    implementation(libs.zxing.core)\n",
         '    implementation(libs.zxing.core)\n    implementation("com.journeyapps:zxing-android-embedded:4.3.0")\n',
         "QR scanner library")
-old_version = '        versionCode = 4\n        versionName = "1.3.0"'
-new_version = '        versionCode = 5\n        versionName = "1.4.0"'
+old_version = '        versionCode = 5\n        versionName = "1.4.0"'
+new_version = '        versionCode = 6\n        versionName = "1.5.0"'
 if old_version in gradle:
     gradle = gradle.replace(old_version, new_version, 1)
 elif new_version not in gradle:
-    raise SystemExit("Could not safely bump app version to TUR BANK 1.4.0.")
+    raise SystemExit("Could not safely bump app version to TUR BANK 1.5.0.")
 gradle_file.write_text(gradle, encoding="utf-8")
 
 screens = screens_file.read_text(encoding="utf-8")
+screens = screens.replace("DemoLockScreen(", "AccountLockScreen(")
+screens = screens.replace("fun DemoLockScreen(", "fun AccountLockScreen(")
+screens = screens.replace("DemoNotice()", "LocalRecordNotice()")
+screens = screens.replace("fun DemoNotice()", "fun LocalRecordNotice()")
 anchor = "import androidx.compose.material.icons.filled.Home\n"
 new_imports = [
     "import androidx.compose.material.icons.filled.GridView",
