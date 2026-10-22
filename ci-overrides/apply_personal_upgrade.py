@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""TUR BANK 1.4 personal onboarding, seed cleanup, QR payment and navigation refresh."""
+"""TUR BANK 1.5 personal onboarding, seed cleanup, QR payment and navigation refresh."""
 from pathlib import Path
 import re
 import sys
@@ -228,7 +228,7 @@ if 'implementation("com.journeyapps:zxing-android-embedded:4.3.0")' not in gradl
     gradle = replace_once(gradle, "    implementation(libs.zxing.core)\n",
         '    implementation(libs.zxing.core)\n    implementation("com.journeyapps:zxing-android-embedded:4.3.0")\n',
         "QR scanner library")
-old_version = '        versionCode = 5\n        versionName = "1.4.0"'
+old_version = '        versionCode = 4\n        versionName = "1.3.0"'
 new_version = '        versionCode = 6\n        versionName = "1.5.0"'
 if old_version in gradle:
     gradle = gradle.replace(old_version, new_version, 1)
