@@ -229,7 +229,7 @@ if 'implementation("com.journeyapps:zxing-android-embedded:4.3.0")' not in gradl
         '    implementation(libs.zxing.core)\n    implementation("com.journeyapps:zxing-android-embedded:4.3.0")\n',
         "QR scanner library")
 old_version = '        versionCode = 4\n        versionName = "1.3.0"'
-new_version = '        versionCode = 6\n        versionName = "1.5.0"'
+new_version = '        versionCode = 7\n        versionName = "1.6.0"'
 if old_version in gradle:
     gradle = gradle.replace(old_version, new_version, 1)
 elif new_version not in gradle:
@@ -403,7 +403,7 @@ if changed_heading != 1:
 screens = screens.replace("private val CardRadius = RoundedCornerShape(22.dp)", "private val CardRadius = RoundedCornerShape(25.dp)")
 screens_file.write_text(screens, encoding="utf-8")
 
-# Localize all formerly demo-centric labels without pretending this app is connected to a real bank.
+# Keep user-facing labels clean and clearly describe local-only account records.
 translations = {
     "values/strings.xml": {
         "demo_warning": "Local records only · not connected to a bank",
@@ -418,7 +418,7 @@ translations = {
         "profile": "Personal profile",
         "session_lock": "Lock the app when reopened",
         "export_csv": "Export activity as CSV",
-        "app_version": "Version 1.5.0 · TUR BANK",
+        "app_version": "Version 1.6.0 · TUR BANK",
         "receive_demo": "QR payments",
         "qr_demo_info": "Scan a payment QR or create your own payment request.",
         "copy_demo_data": "Copy QR details",
@@ -461,7 +461,7 @@ translations = {
         "profile": "Kişisel profil",
         "session_lock": "Uygulama yeniden açılınca kilitle",
         "export_csv": "Hareketleri CSV olarak dışa aktar",
-        "app_version": "Sürüm 1.5.0 · TUR BANK",
+        "app_version": "Sürüm 1.6.0 · TUR BANK",
         "receive_demo": "QR ile ödeme",
         "qr_demo_info": "Ödeme QR'ını okut veya kendi ödeme talebini oluştur.",
         "copy_demo_data": "QR bilgilerini kopyala",
@@ -504,7 +504,7 @@ translations = {
         "profile": "Persönliches Profil",
         "session_lock": "App beim erneuten Öffnen sperren",
         "export_csv": "Aktivitäten als CSV exportieren",
-        "app_version": "Version 1.5.0 · TUR BANK",
+        "app_version": "Version 1.6.0 · TUR BANK",
         "receive_demo": "QR-Zahlung",
         "qr_demo_info": "Zahlungs-QR scannen oder eine eigene Zahlungsanfrage erstellen.",
         "copy_demo_data": "QR-Daten kopieren",
@@ -568,4 +568,4 @@ for rel, mapping in translations.items():
         raise SystemExit(f"Required strings missing in {rel}: {sorted(missing)}")
     path.write_text(content, encoding="utf-8")
 
-print("Applied personalized onboarding, seed cleanup, PIN-based local lock, QR payment scanner and redesigned secondary navigation.")
+print("Applied personalized onboarding, local balance entries, QR payments and animated premium navigation.")
