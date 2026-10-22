@@ -372,6 +372,20 @@ if receive_route_old in screens:
     screens = screens.replace(receive_route_old, 'composable("receive") { RouteEntrance { QrPaymentScreen(vm, settings) } }\n            composable("qr-pay") { RouteEntrance { QrPaymentScreen(vm, settings) } }', 1)
 elif 'composable("qr-pay")' not in screens:
     raise SystemExit("Could not locate QR destination insertion point.")
+funds_route = '            composable("add-funds") { RouteEntrance { AddFundsScreen(vm, settings) } }'
+if funds_route not in screens:
+    screens = replace_once(
+        screens,
+        '            composable("qr-pay") { RouteEntrance { QrPaymentScreen(vm, settings) } }',
+        '            composable("qr-pay") { RouteEntrance { QrPaymentScreen(vm, settings) } }\n' + funds_route,
+        "add balance-entry route"
+    )
+receive_screen_start = screens.find("@Composable\nprivate fun ReceiveScreen(")
+receive_screen_end = screens.find("\nprivate fun createQrBitmap", receive_screen_start)
+if receive_screen_start >= 0:
+    if receive_screen_end < 0:
+        raise SystemExit("Could not isolate obsolete ReceiveScreen.")
+    screens = screens[:receive_screen_start] + screens[receive_screen_end + 1:]
 screens = screens.replace("DEMO MODU · GÜVENLİ DENEME", "KİŞİSEL HESAP · YEREL KAYIT")
 screens = screens.replace("DEMO MODE · SAFE SANDBOX", "PERSONAL ACCOUNT · LOCAL LEDGER")
 screens = screens.replace("DEMO-MODUS · SICHERE TESTUMGEBUNG", "PERSÖNLICHES KONTO · LOKALES KONTOBUCH")
@@ -531,10 +545,23 @@ for rel, mapping in translations.items():
     seen = set()
     def change_string(match):
         name = match.group(2)
-        if name not in mapping:
-            return match.group(0)
-        seen.add(name)
-        return match.group(1) + mapping[name].replace("'", "\\'") + match.group(4)
+        if name in mapping:
+            seen.add(name)
+            value = mapping[name]
+        else:
+            value = match.group(3)
+        if rel.startswith("values-tr/"):
+            local_word = "yerel"
+        elif rel.startswith("values-de/"):
+            local_word = "lokal"
+        else:
+            local_word = "local"
+        def clean_demo(match_word):
+            word = match_word.group(0)
+            replacement = local_word.upper() if word.isupper() else local_word.capitalize() if word[0].isupper() else local_word
+            return replacement
+        value = re.sub(r"(?i)demo", clean_demo, value)
+        return match.group(1) + value.replace("'", "\\'") + match.group(4)
     content = string_re.sub(change_string, content)
     required = {"demo_warning", "reset_demo", "demo_user", "about_body", "receive_demo", "profile", "ledger_notice", "app_version"}
     missing = required - seen
