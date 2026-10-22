@@ -207,6 +207,7 @@ if "PersonalAccountSetupScreen(" not in main:
                                 .putBoolean("setup_complete", true)
                                 .apply()
                             hasPersonalSetup = true
+                            unlocked = true
                             vm.completePersonalSetup(accountName, accountType, currency)
                         }
                     )
@@ -319,10 +320,10 @@ if nav_annotated not in screens:
 # Update title for QR and replace the old five bottom shortcuts with a coherent five-destination bar.
 old_receive_title = '        "receive" -> stringResource(R.string.receive_demo)\n'
 if old_receive_title in screens:
-    screens = screens.replace(old_receive_title, '        "receive", "qr-pay" -> stringResource(R.string.receive_demo)\n', 1)
+    screens = screens.replace(old_receive_title, '        "receive", "qr-pay" -> stringResource(R.string.receive_demo)\n        "add-funds" -> appText(settings.language, "Hesaba para ekle", "Add funds", "Geld hinzufügen")\n', 1)
 elif '"qr-pay" -> stringResource(R.string.receive_demo)' not in screens:
     notif_anchor = '        "notifications" -> stringResource(R.string.notifications)\n'
-    screens = replace_once(screens, notif_anchor, '        "qr-pay" -> stringResource(R.string.receive_demo)\n' + notif_anchor, "QR toolbar title")
+    screens = replace_once(screens, notif_anchor, '        "qr-pay" -> stringResource(R.string.receive_demo)\n        "add-funds" -> appText(settings.language, "Hesaba para ekle", "Add funds", "Geld hinzufügen")\n' + notif_anchor, "QR toolbar title")
 bottom_start = screens.find("    val bottomItems = listOf(")
 bottom_end = screens.find("\n\n    Scaffold(", bottom_start)
 if bottom_start < 0 or bottom_end < 0:
