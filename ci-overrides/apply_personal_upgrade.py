@@ -215,8 +215,8 @@ if "PersonalAccountSetupScreen(" not in main:
 if "language = settings.language,\n                        showBiometric = settings.biometricPreference," not in main:
     main = replace_once(
         main,
-        'settings.lockOnRestart && !unlocked -> DemoLockScreen(\n                        showBiometric = settings.biometricPreference,',
-        'settings.lockOnRestart && !unlocked -> DemoLockScreen(\n                        language = settings.language,\n                        showBiometric = settings.biometricPreference,',
+        'settings.lockOnRestart && !unlocked -> AccountLockScreen(\n                        showBiometric = settings.biometricPreference,',
+        'settings.lockOnRestart && !unlocked -> AccountLockScreen(\n                        language = settings.language,\n                        showBiometric = settings.biometricPreference,',
         "pass selected language to PIN lock"
     )
 main_file.write_text(main, encoding="utf-8")
