@@ -105,14 +105,6 @@ jobs:
           } | tee -a "$CI_REPORT_DIR/project-discovery.log"
           printf '\nProject path: %s\n' "$PROJECT_DIR" >> "$CI_REPORT_DIR/diagnostics.txt"
 
-      - name: Temporary inspect source archive
-        uses: actions/upload-artifact@v7
-        with:
-          name: TUR-BANK-SOURCE-INSPECT
-          path: ${{ github.workspace }}/TUR-BANK-SOURCE.zip
-          if-no-files-found: error
-          retention-days: 1
-
       - name: Apply source compilation fix
         id: apply_source_fix
         shell: bash
@@ -154,6 +146,29 @@ jobs:
           python3 "$GITHUB_WORKSPACE/ci-overrides/apply_visual_refresh.py" "$PROJECT_DIR"
           python3 "$GITHUB_WORKSPACE/ci-overrides/apply_personal_upgrade.py" "$PROJECT_DIR"
           test -f "$PROJECT_DIR/app/src/main/java/com/turbank/mobile/ui/ProfileScreen.kt"
+          test -f "$PROJECT_DIR/app/src/main/java/com/turbank/mobile/ui/AddFundsScreen.kt"
+          grep -Fq 'fun addFunds(' "$PROJECT_DIR/app/src/main/java/com/turbank/mobile/BankViewModel.kt"
+          grep -Fq 'composable("add-funds")' "$PROJECT_DIR/app/src/main/java/com/turbank/mobile/ui/BankScreens.kt"
+          grep -Fq 'BankTool("add-funds"' "$PROJECT_DIR/app/src/main/java/com/turbank/mobile/ui/PremiumToolsScreen.kt"
+          grep -Fq 'versionName = "1.5.0"' "$PROJECT_DIR/app/build.gradle.kts"
+          python3 - "$PROJECT_DIR/app/src/main/res" <<'PY'
+          import pathlib, re, sys, xml.etree.ElementTree as ET
+          root = pathlib.Path(sys.argv[1])
+          found = []
+          for path in root.rglob("strings.xml"):
+              try:
+                  xml = ET.parse(path).getroot()
+              except ET.ParseError as exc:
+                  raise SystemExit(f"Invalid XML: {path}: {exc}")
+              for item in xml.findall("string"):
+                  value = "".join(item.itertext())
+                  if re.search(r"demo", value, re.IGNORECASE):
+                      found.append(f"{path}:{item.attrib.get('name', '?')}: {value}")
+          if found:
+              print("\n".join(found))
+              raise SystemExit("User-facing strings still contain forbidden demo wording.")
+          print("All localized string values are clear of demo wording.")
+          PY
           test -f "$PROJECT_DIR/app/src/main/java/com/turbank/mobile/ui/PersonalAccountSetupScreen.kt"
           test -f "$PROJECT_DIR/app/src/main/java/com/turbank/mobile/ui/QrPaymentScreen.kt"
           test -f "$PROJECT_DIR/app/src/main/java/com/turbank/mobile/ui/PremiumToolsScreen.kt"
@@ -168,7 +183,7 @@ jobs:
             echo "::error::Obsolete offline academy screen must not be included."
             exit 1
           fi
-          echo "Applied full navigation refresh, user account onboarding, PIN lock, QR scan/payment requests and local ledger cleanup." | tee "$CI_REPORT_DIR/plus-ui.log"
+          echo "Applied premium menu system, balance top-up screen, QR payments, personal setup, and demo-free localized copy." | tee "$CI_REPORT_DIR/plus-ui.log"
 
       - name: Remove synthetic APK size filler
         id: remove_synthetic_asset
@@ -306,7 +321,7 @@ jobs:
             echo "APK path: $APK_PATH"
             echo "APK size: $APK_BYTES bytes"
             echo "APK size in MiB: $(awk -v b="$APK_BYTES" 'BEGIN {printf "%.2f", b/1048576}')"
-            echo "Version: 1.4.0"
+            echo "Version: 1.5.0"
             echo "Offline videos: none"
             echo "Synthetic filler: none"
             echo "SHA-256: $(sha256sum "$APK_PATH" | awk '{print $1}')"
