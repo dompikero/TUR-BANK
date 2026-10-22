@@ -546,7 +546,7 @@ for rel, mapping in translations.items():
         name = match.group(2)
         if name in mapping:
             seen.add(name)
-            value = mapping[name]
+            value = mapping[name].replace("'", "\\'")
         else:
             value = match.group(3)
         if rel.startswith("values-tr/"):
@@ -560,7 +560,7 @@ for rel, mapping in translations.items():
             replacement = local_word.upper() if word.isupper() else local_word.capitalize() if word[0].isupper() else local_word
             return replacement
         value = re.sub(r"(?i)demo", clean_demo, value)
-        return match.group(1) + value.replace("'", "\\'") + match.group(4)
+        return match.group(1) + value + match.group(4)
     content = string_re.sub(change_string, content)
     required = {"demo_warning", "reset_demo", "demo_user", "about_body", "receive_demo", "profile", "ledger_notice", "app_version"}
     missing = required - seen
