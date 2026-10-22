@@ -174,7 +174,7 @@ jobs:
           test -f "$PROJECT_DIR/app/src/main/java/com/turbank/mobile/ui/PremiumToolsScreen.kt"
           grep -Fq 'composable("qr-pay")' "$PROJECT_DIR/app/src/main/java/com/turbank/mobile/ui/BankScreens.kt"
           grep -Fq 'TURBANK_PAY_V1' "$PROJECT_DIR/app/src/main/java/com/turbank/mobile/ui/QrPaymentScreen.kt"
-          grep -Fq 'versionName = "1.4.0"' "$PROJECT_DIR/app/build.gradle.kts"
+          grep -Fq 'versionName = "1.5.0"' "$PROJECT_DIR/app/build.gradle.kts"
           test -f "$PROJECT_DIR/app/src/main/java/com/turbank/mobile/ui/FinanceHubScreen.kt"
           grep -Fq 'composable("profile")' "$PROJECT_DIR/app/src/main/java/com/turbank/mobile/ui/BankScreens.kt"
           grep -Fq 'composable("finance-hub")' "$PROJECT_DIR/app/src/main/java/com/turbank/mobile/ui/BankScreens.kt"
