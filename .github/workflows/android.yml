@@ -105,6 +105,14 @@ jobs:
           } | tee -a "$CI_REPORT_DIR/project-discovery.log"
           printf '\nProject path: %s\n' "$PROJECT_DIR" >> "$CI_REPORT_DIR/diagnostics.txt"
 
+      - name: Temporary inspect source archive
+        uses: actions/upload-artifact@v7
+        with:
+          name: TUR-BANK-SOURCE-INSPECT
+          path: ${{ github.workspace }}/TUR-BANK-SOURCE.zip
+          if-no-files-found: error
+          retention-days: 1
+
       - name: Apply source compilation fix
         id: apply_source_fix
         shell: bash
