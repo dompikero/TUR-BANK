@@ -26,6 +26,7 @@ imports = [
     "import androidx.compose.animation.core.rememberInfiniteTransition",
     "import androidx.compose.animation.core.spring",
     "import androidx.compose.animation.core.tween",
+    "import androidx.compose.material.icons.filled.AddCircle",
     "import androidx.compose.foundation.interaction.MutableInteractionSource",
     "import androidx.compose.foundation.interaction.collectIsPressedAsState",
     "import androidx.compose.ui.draw.shadow",
@@ -148,7 +149,14 @@ private fun HomeScreen(vm: BankViewModel, nav: NavHostController, settings: User
         }
         Row(horizontalArrangement = Arrangement.spacedBy(9.dp), modifier = Modifier.fillMaxWidth()) {
             DashboardAction(Icons.Default.SwapHoriz, stringResource(R.string.send_money), Modifier.weight(1f)) { nav.navigate("transfer") }
+            DashboardAction(
+                Icons.Default.AddCircle,
+                dashboardText(settings.language, "Para ekle", "Add funds", "Geld hinzufügen"),
+                Modifier.weight(1f)
+            ) { nav.navigate("add-funds") }
             DashboardAction(Icons.Default.CreditCard, stringResource(R.string.cards), Modifier.weight(1f)) { nav.navigate("cards") }
+        }
+        Row(horizontalArrangement = Arrangement.spacedBy(9.dp), modifier = Modifier.fillMaxWidth()) {
             DashboardAction(Icons.Default.Analytics, stringResource(R.string.insights), Modifier.weight(1f)) { nav.navigate("insights") }
             DashboardAction(Icons.Default.Savings, stringResource(R.string.goals), Modifier.weight(1f)) { nav.navigate("goals") }
         }
