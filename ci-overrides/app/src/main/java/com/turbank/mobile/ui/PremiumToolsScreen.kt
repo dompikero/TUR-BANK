@@ -1,6 +1,16 @@
 package com.turbank.mobile.ui
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -62,6 +72,8 @@ private data class BankTool(
 @Composable
 fun PremiumToolsScreen(settings: UserSettings, nav: NavHostController) {
     val language = settings.language
+    var menuVisible by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) { menuVisible = true }
     val destinations = listOf(
         BankTool("add-funds", toolsText(language, "Hesaba para ekle", "Add funds", "Geld hinzufügen"), toolsText(language, "Bakiyene giriş kaydı ekle", "Add a balance entry", "Saldoeintrag hinzufügen"), Icons.Default.AddCircle),
         BankTool("qr-pay", toolsText(language, "QR ile ödeme", "QR payments", "QR-Zahlung"), toolsText(language, "QR okut veya talep oluştur", "Scan or create a request", "Scannen oder Anfrage erstellen"), Icons.Default.QrCode2),
@@ -95,11 +107,16 @@ fun PremiumToolsScreen(settings: UserSettings, nav: NavHostController) {
                 Text(toolsText(language, "Ödemeler, kartlar, birikimler ve finansal araçlar.", "Payments, cards, savings and finance tools.", "Zahlungen, Karten, Sparziele und Finanztools."), color = Color.White.copy(alpha = 0.84f), style = MaterialTheme.typography.bodyMedium)
             }
         }
-        destinations.chunked(2).forEach { rowItems ->
+        destinations.chunked(2).forEachIndexed { rowIndex, rowItems ->
+            AnimatedVisibility(
+                visible = menuVisible,
+                enter = fadeIn(animationSpec = tween(240 + rowIndex * 65)) +
+                    slideInVertically(initialOffsetY = { it / 8 }, animationSpec = tween(280 + rowIndex * 65))
+            ) {
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.fillMaxWidth()) {
                 rowItems.forEach { item ->
                     Card(
-                        modifier = Modifier.weight(1f).clickable { nav.navigate(item.route) { launchSingleTop = true } },
+                        modifier = Modifier.weight(1f).animateContentSize().clickable { nav.navigate(item.route) { launchSingleTop = true } },
                         shape = RoundedCornerShape(23.dp),
                         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
                         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
@@ -117,6 +134,7 @@ fun PremiumToolsScreen(settings: UserSettings, nav: NavHostController) {
                     }
                 }
                 if (rowItems.size == 1) Spacer(Modifier.weight(1f))
+            }
             }
         }
         Text(
