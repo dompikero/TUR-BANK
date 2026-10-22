@@ -236,8 +236,6 @@ elif new_version not in gradle:
 gradle_file.write_text(gradle, encoding="utf-8")
 
 screens = screens_file.read_text(encoding="utf-8")
-screens = screens.replace("DemoLockScreen(", "AccountLockScreen(")
-screens = screens.replace("fun DemoLockScreen(", "fun AccountLockScreen(")
 screens = screens.replace("DemoNotice()", "LocalRecordNotice()")
 screens = screens.replace("fun DemoNotice()", "fun LocalRecordNotice()")
 anchor = "import androidx.compose.material.icons.filled.Home\n"
@@ -256,7 +254,7 @@ nav_start = screens.find("@Composable\nfun MainBankNavigation(vm: BankViewModel)
 if lock_start < 0 or nav_start < 0 or nav_start <= lock_start:
     raise SystemExit("Could not isolate access-lock composable.")
 lock_screen = '''@Composable
-fun DemoLockScreen(language: String, showBiometric: Boolean, onUnlock: () -> Unit, onBiometricUnlock: () -> Unit) {
+fun AccountLockScreen(language: String, showBiometric: Boolean, onUnlock: () -> Unit, onBiometricUnlock: () -> Unit) {
     val context = LocalContext.current
     val prefs = remember { context.getSharedPreferences("tur_bank_personal_profile", Context.MODE_PRIVATE) }
     val salt = remember { prefs.getString("profile_pin_salt", "").orEmpty() }
