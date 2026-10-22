@@ -1,6 +1,10 @@
 package com.turbank.mobile.ui
 
 import androidx.compose.foundation.background
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -213,7 +217,11 @@ fun AddFundsScreen(vm: BankViewModel, settings: UserSettings) {
             }
         }
 
-        if (account != null && amountMinor != null && amountMinor > 0) {
+        AnimatedVisibility(
+            visible = account != null && amountMinor != null && amountMinor > 0,
+            enter = fadeIn(animationSpec = tween(220)) + slideInVertically(initialOffsetY = { it / 10 }, animationSpec = tween(260))
+        ) {
+            if (account != null && amountMinor != null && amountMinor > 0) {
             Card(shape = RoundedCornerShape(23.dp), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)) {
                 Row(
                     Modifier.fillMaxWidth().padding(17.dp),
@@ -231,6 +239,7 @@ fun AddFundsScreen(vm: BankViewModel, settings: UserSettings) {
                         )
                     }
                 }
+            }
             }
         }
 
