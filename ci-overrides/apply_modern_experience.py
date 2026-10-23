@@ -95,7 +95,7 @@ for rel, mapping in translations.items():
     insertions = []
     for name, value in mapping.items():
         if name not in names:
-            safe = value.replace("&", "&amp;").replace("'", "\\'")
+            safe = value.replace("&", "&amp;")
             insertions.append(f'    <string name="{name}">{safe}</string>')
     if insertions:
         raw = raw.replace("</resources>", "\n".join(insertions) + "\n</resources>", 1)
