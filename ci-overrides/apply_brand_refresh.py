@@ -116,7 +116,7 @@ main_file.write_text(main, encoding="utf-8")
 # Use the exact logo on the language selection screen and security unlock screen.
 screens_file = ui / "BankScreens.kt"
 screens = screens_file.read_text(encoding="utf-8")
-for line in ["import androidx.compose.ui.res.painterResource", "import androidx.compose.ui.layout.ContentScale"]:
+for line in ["import androidx.compose.ui.res.painterResource", "import androidx.compose.ui.layout.ContentScale", "import com.turbank.mobile.R"]:
     if line not in screens:
         anchor = "import androidx.compose.ui.res.stringResource\n"
         screens = replace_once(screens, anchor, anchor + line + "\n", "logo image import")
