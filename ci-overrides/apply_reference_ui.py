@@ -87,9 +87,9 @@ screens = replace_once(
     '    )',
     '    val bottomItems = listOf(\n'
     '        BottomItem("home", R.string.home, Icons.Default.Home),\n'
-    '        BottomItem("transfer", R.string.transfer, Icons.Default.Send),\n'
-    '        BottomItem("payments", R.string.payments_home, Icons.Default.QrCode2),\n'
+    '        BottomItem("accounts", R.string.accounts, Icons.Default.AccountBalanceWallet),\n'
     '        BottomItem("cards", R.string.cards, Icons.Default.CreditCard),\n'
+    '        BottomItem("payments", R.string.payments_home, Icons.Default.QrCode2),\n'
     '        BottomItem("tools", R.string.explore, Icons.Default.GridView)\n'
     '    )',
     "reference bottom navigation"
@@ -101,6 +101,22 @@ screens = replace_once(
     route_anchor + '            composable("payments") { RouteEntrance { PaymentsHubScreen(vm, nav, settings) } }\n',
     "payments hub route"
 )
+
+# Route the primary screens to dedicated layouts based on the supplied reference.
+home_route_pattern = re.compile(r'(?m)^(\\s*)composable\\("home"\\) \\{ RouteEntrance \\{.*\\}\\s*\\}\\s*$')
+screens, home_route_count = home_route_pattern.subn(
+    lambda match: match.group(1) + 'composable("home") { RouteEntrance { ReferenceHomeScreen(vm, nav, settings) } }',
+    screens, count=1
+)
+if home_route_count != 1:
+    raise SystemExit("Could not route Home to the reference-matched dashboard.")
+activity_route_pattern = re.compile(r'(?m)^(\\s*)composable\\("activity"\\) \\{ RouteEntrance \\{.*\\}\\s*\\}\\s*$')
+screens, activity_route_count = activity_route_pattern.subn(
+    lambda match: match.group(1) + 'composable("activity") { RouteEntrance { TransactionHistoryScreen(vm, nav, settings) } }',
+    screens, count=1
+)
+if activity_route_count != 1:
+    raise SystemExit("Could not route activity to the reference-matched transaction history.")
 
 # Home search field sits between the personal header and balance card and filters local activity.
 screens = replace_once(

@@ -157,7 +157,7 @@ jobs:
             exit 1
           fi
           grep -Fq 'stringResource(R.string.secret_add_funds)' "$PROJECT_DIR/app/src/main/java/com/turbank/mobile/ui/BankScreens.kt"
-          grep -Fq 'versionName = "1.8.2"' "$PROJECT_DIR/app/build.gradle.kts"
+          grep -Fq 'versionName = "1.8.3"' "$PROJECT_DIR/app/build.gradle.kts"
           python3 - "$PROJECT_DIR/app/src/main/res" <<'PY'
           import pathlib, re, sys, xml.etree.ElementTree as ET
           root = pathlib.Path(sys.argv[1])
@@ -180,6 +180,10 @@ jobs:
           test -f "$PROJECT_DIR/app/src/main/java/com/turbank/mobile/ui/QrPaymentScreen.kt"
           test -f "$PROJECT_DIR/app/src/main/java/com/turbank/mobile/ui/PremiumToolsScreen.kt"
           test -f "$PROJECT_DIR/app/src/main/java/com/turbank/mobile/ui/PaymentsHubScreen.kt"
+          test -f "$PROJECT_DIR/app/src/main/java/com/turbank/mobile/ui/ReferenceHomeScreen.kt"
+          test -f "$PROJECT_DIR/app/src/main/java/com/turbank/mobile/ui/TransactionHistoryScreen.kt"
+          grep -Fq 'ReferenceHomeScreen(vm, nav, settings)' "$PROJECT_DIR/app/src/main/java/com/turbank/mobile/ui/BankScreens.kt"
+          grep -Fq 'TransactionHistoryScreen(vm, nav, settings)' "$PROJECT_DIR/app/src/main/java/com/turbank/mobile/ui/BankScreens.kt"
           test -f "$PROJECT_DIR/app/src/main/java/com/turbank/mobile/ui/BrandSplashScreen.kt"
           test -f "$PROJECT_DIR/app/src/main/java/com/turbank/mobile/ui/TURBankTextField.kt"
           test -f "$PROJECT_DIR/app/src/main/java/com/turbank/mobile/ui/CameraQrScannerScreen.kt"
@@ -192,7 +196,7 @@ jobs:
           grep -Fq 'BrandSplashScreen()' "$PROJECT_DIR/app/src/main/java/com/turbank/mobile/MainActivity.kt"
           grep -Fq 'android:icon="@drawable/ic_tur_bank"' "$PROJECT_DIR/app/src/main/AndroidManifest.xml"
           grep -Fq 'TURBANK_PAY_V1' "$PROJECT_DIR/app/src/main/java/com/turbank/mobile/ui/QrPaymentScreen.kt"
-          grep -Fq 'versionName = "1.8.2"' "$PROJECT_DIR/app/build.gradle.kts"
+          grep -Fq 'versionName = "1.8.3"' "$PROJECT_DIR/app/build.gradle.kts"
           test -f "$PROJECT_DIR/app/src/main/java/com/turbank/mobile/ui/FinanceHubScreen.kt"
           grep -Fq 'composable("profile")' "$PROJECT_DIR/app/src/main/java/com/turbank/mobile/ui/BankScreens.kt"
           grep -Fq 'composable("finance-hub")' "$PROJECT_DIR/app/src/main/java/com/turbank/mobile/ui/BankScreens.kt"

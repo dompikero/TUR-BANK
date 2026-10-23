@@ -60,7 +60,7 @@ for dependency in camera_dependencies:
     if dependency not in gradle:
         gradle = replace_once(gradle, "dependencies {\n", "dependencies {\n" + dependency + "\n", "CameraX and QR decoder dependency insertion")
 version_pattern = re.compile(r"versionCode\s*=\s*\d+\s*\n\s*versionName\s*=\s*\"[^\"]+\"")
-gradle, version_count = version_pattern.subn('versionCode = 11\n        versionName = "1.8.2"', gradle, count=1)
+gradle, version_count = version_pattern.subn('versionCode = 12\n        versionName = "1.8.3"', gradle, count=1)
 if version_count != 1:
     raise SystemExit(f"Could not safely bump build to 1.8.0 (matches={version_count}).")
 gradle_file.write_text(gradle, encoding="utf-8")
@@ -90,8 +90,8 @@ translations = {
 for rel, mapping in translations.items():
     path = app / "src/main/res" / rel
     raw = path.read_text(encoding="utf-8")
-    for old_version in ("1.6.0", "1.7.0", "1.8.0", "1.8.1"):
-        raw = raw.replace(old_version, "1.8.2")
+    for old_version in ("1.6.0", "1.7.0", "1.8.0", "1.8.1", "1.8.2"):
+        raw = raw.replace(old_version, "1.8.3")
     root = ET.fromstring(raw)
     names = {item.attrib.get("name") for item in root.findall("string")}
     insertions = []
@@ -269,4 +269,4 @@ if "onClick = { showCameraScanner = true }" not in qr:
     raise SystemExit("QR screen is not wired to the live camera.")
 if field_count < 8:
     raise SystemExit("Modern shared input styling was not applied broadly.")
-print(f"Applied {field_count} animated form fields, live CameraX QR scanning, flash controls, hidden settings funds action, and version 1.8.2. Removed receipt OCR/image-labeling bloat.")
+print(f"Applied {field_count} animated form fields, live CameraX QR scanning, flash controls, hidden settings funds action, and version 1.8.3. Removed receipt OCR/image-labeling bloat.")

@@ -99,6 +99,7 @@ fun PaymentsHubScreen(vm: BankViewModel, nav: NavHostController, settings: UserS
         query.isNotBlank() && listOf(account.name, account.currencyCode, account.id)
             .any { it.contains(query, ignoreCase = true) }
     }
+    val recentPeople = recent.map { it.recipient.trim() }.filter { it.isNotBlank() }.distinct().take(6)
     Column(
         Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 18.dp, vertical = 12.dp),
         verticalArrangement = Arrangement.spacedBy(17.dp)
@@ -214,9 +215,9 @@ fun PaymentsHubScreen(vm: BankViewModel, nav: NavHostController, settings: UserS
                             Modifier.fillMaxSize().background(
                                 Brush.linearGradient(
                                     when (index) {
-                                        0 -> listOf(Color(0xFF152229), Color(0xFF172F2B))
-                                        1 -> listOf(Color(0xFF151E24), Color(0xFF1D2B35))
-                                        else -> listOf(Color(0xFF14261F), Color(0xFF192E29))
+                                        0 -> listOf(Color(0xFFF3F6F5), Color(0xFFE3EBE7))
+                                        1 -> listOf(Color(0xFFF1F4F3), Color(0xFFE4EAE8))
+                                        else -> listOf(Color(0xFFF1F5F2), Color(0xFFE2EEE7))
                                     }
                                 )
                             ).padding(14.dp)
@@ -231,84 +232,30 @@ fun PaymentsHubScreen(vm: BankViewModel, nav: NavHostController, settings: UserS
 
         Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(paymentsText(settings.language, "Son Kişiler", "Recent people", "Letzte Personen"), modifier = Modifier.weight(1f), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                 Text(
-                    paymentsText(settings.language, "Son transferler", "Recent transfers", "Letzte Überweisungen"),
-                    modifier = Modifier.weight(1f),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
-                )
-                Text(
-                    paymentsText(settings.language, "Tümünü gör", "View all", "Alle ansehen"),
+                    paymentsText(settings.language, "Tümünü Gör", "View all", "Alle ansehen"),
                     color = MaterialTheme.colorScheme.primary,
                     style = MaterialTheme.typography.labelLarge,
                     modifier = Modifier.clip(RoundedCornerShape(10.dp)).clickable { nav.navigate("activity") }.padding(5.dp)
                 )
             }
-            if (filteredTransactions.isEmpty()) {
-                Card(shape = RoundedCornerShape(22.dp), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
+            if (recentPeople.isEmpty()) {
+                Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(22.dp), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
                     Text(
-                        if (query.isNotBlank())
-                            paymentsText(settings.language, "Eşleşen hareket bulunamadı.", "No matching activity found.", "Keine passenden Aktivitäten gefunden.")
-                        else
-                            paymentsText(settings.language, "Henüz hareket yok. İlk işlemini yaptığında burada görünecek.", "No activity yet. Your first transaction will appear here.", "Noch keine Aktivitäten. Deine erste Buchung erscheint hier."),
-                        modifier = Modifier.fillMaxWidth().padding(18.dp),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        style = MaterialTheme.typography.bodyMedium
+                        paymentsText(settings.language, "İlk transferinden sonra kişiler burada görünecek.", "Recipients will appear here after your first transfer.", "Empfänger erscheinen nach deiner ersten Überweisung hier."),
+                        modifier = Modifier.fillMaxWidth().padding(16.dp),
+                        style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             } else {
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(25.dp),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
-                ) {
-                    Column(Modifier.fillMaxWidth().padding(horizontal = 13.dp)) {
-                        filteredTransactions.take(5).forEachIndexed { index, transaction ->
-                            val currency = accounts.firstOrNull { it.id == transaction.accountId }?.currencyCode ?: settings.displayCurrency
-                            Row(
-                                Modifier.fillMaxWidth().clickable { nav.navigate("activity") }.padding(vertical = 12.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(11.dp)
-                            ) {
-                                Box(
-                                    Modifier.size(43.dp).clip(CircleShape).background(MaterialTheme.colorScheme.surfaceVariant),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Icon(
-                                        if (transaction.direction == "IN") Icons.Default.ArrowDownward else Icons.Default.ArrowUpward,
-                                        contentDescription = null,
-                                        tint = if (transaction.direction == "IN") MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
-                                        modifier = Modifier.size(20.dp)
-                                    )
-                                }
-                                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
-                                    Text(
-                                        transaction.recipient.ifBlank { transaction.description.ifBlank { transaction.category } },
-                                        fontWeight = FontWeight.SemiBold,
-                                        maxLines = 1,
-                                        style = MaterialTheme.typography.bodyMedium
-                                    )
-                                    Text(
-                                        transaction.description.ifBlank { transaction.category },
-                                        maxLines = 1,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                        style = MaterialTheme.typography.labelSmall
-                                    )
-                                }
-                                Column(horizontalAlignment = Alignment.End, verticalArrangement = Arrangement.spacedBy(3.dp)) {
-                                    Text(
-                                        (if (transaction.direction == "IN") "+" else "−") + Money.format(transaction.amountMinor, currency, settings.language),
-                                        color = if (transaction.direction == "IN") MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
-                                        fontWeight = FontWeight.Bold,
-                                        style = MaterialTheme.typography.bodySmall,
-                                        maxLines = 1
-                                    )
-                                    Text(transaction.status, color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.labelSmall)
-                                }
+                Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(14.dp)) {
+                    recentPeople.forEach { person ->
+                        Column(Modifier.width(58.dp).clickable { nav.navigate("transfer") { launchSingleTop = true } }, horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                            Box(Modifier.size(47.dp).clip(CircleShape).background(MaterialTheme.colorScheme.surfaceVariant), contentAlignment = Alignment.Center) {
+                                Text(person.take(1).uppercase(), color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
                             }
-                            if (index < filteredTransactions.take(5).lastIndex) {
-                                Spacer(Modifier.fillMaxWidth().height(1.dp).background(MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f)))
-                            }
+                            Text(person.take(9), style = MaterialTheme.typography.labelSmall, maxLines = 1)
                         }
                     }
                 }

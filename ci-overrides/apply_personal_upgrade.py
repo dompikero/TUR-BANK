@@ -352,12 +352,6 @@ actions = '''                actions = {
                     IconButton(onClick = { nav.navigate("qr-pay") { launchSingleTop = true } }) {
                         Icon(Icons.Default.QrCode2, contentDescription = appText(settings.language, "QR ile ödeme", "QR payments", "QR-Zahlung"))
                     }
-                    IconButton(onClick = { nav.navigate("profile") { launchSingleTop = true } }) {
-                        Icon(Icons.Default.Person, contentDescription = appText(settings.language, "Profil", "Profile", "Profil"))
-                    }
-                    IconButton(onClick = { nav.navigate("notifications") { launchSingleTop = true } }) {
-                        Icon(Icons.Default.Notifications, contentDescription = stringResource(R.string.notifications))
-                    }
                 }'''
 screens, action_count = re.subn(r'(?s)                actions = \{.*?\n                \}', actions, screens, count=1)
 if action_count != 1:
