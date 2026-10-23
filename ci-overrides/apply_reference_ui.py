@@ -103,14 +103,14 @@ screens = replace_once(
 )
 
 # Route the primary screens to dedicated layouts based on the supplied reference.
-home_route_pattern = re.compile(r'(?m)^(\\s*)composable\\("home"\\) \\{ RouteEntrance \\{.*\\}\\s*\\}\\s*$')
+home_route_pattern = re.compile(r'(?m)^(\s*)composable\("home"\) \{ RouteEntrance \{.*\}\s*\}\s*$')
 screens, home_route_count = home_route_pattern.subn(
     lambda match: match.group(1) + 'composable("home") { RouteEntrance { ReferenceHomeScreen(vm, nav, settings) } }',
     screens, count=1
 )
 if home_route_count != 1:
     raise SystemExit("Could not route Home to the reference-matched dashboard.")
-activity_route_pattern = re.compile(r'(?m)^(\\s*)composable\\("activity"\\) \\{ RouteEntrance \\{.*\\}\\s*\\}\\s*$')
+activity_route_pattern = re.compile(r'(?m)^(\s*)composable\("activity"\) \{ RouteEntrance \{.*\}\s*\}\s*$')
 screens, activity_route_count = activity_route_pattern.subn(
     lambda match: match.group(1) + 'composable("activity") { RouteEntrance { TransactionHistoryScreen(vm, nav, settings) } }',
     screens, count=1
