@@ -24,7 +24,7 @@ def replace_once(text, old, new, label):
 
 
 # Keep the primary surface near-black with emerald actions, matching the supplied reference.
-if "import androidx.compose.material3.darkColorScheme" not in screens:
+if "import androidx.compose.material3.darkColorScheme" not in screens and "import androidx.compose.material3.*" not in screens:
     anchor = "import androidx.compose.material3.MaterialTheme\n"
     screens = replace_once(screens, anchor, anchor + "import androidx.compose.material3.darkColorScheme\n", "dark palette import")
 if "import androidx.compose.material.icons.filled.Search" not in screens:
