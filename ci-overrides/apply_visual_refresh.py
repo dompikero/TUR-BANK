@@ -83,7 +83,7 @@ private fun HomeScreen(vm: BankViewModel, nav: NavHostController, settings: User
             ) {
                 Box(
                     modifier = Modifier.size(48.dp).clip(RoundedCornerShape(17.dp))
-                        .background(Brush.linearGradient(listOf(Color(0xFF2563EB), Color(0xFF14B8A6)))),
+                        .background(Brush.linearGradient(listOf(Color(0xFF079B63), Color(0xFF35C88B)))),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
@@ -286,47 +286,47 @@ private fun DashboardBalanceCard(
     val displayedBalance = if (showBalances) Money.format(totalMinor, currency, language) else "••••••"
     Box(
         Modifier.fillMaxWidth().shadow(15.dp, shape, clip = false).clip(shape)
-            .background(Brush.linearGradient(listOf(Color(0xFF07172F), Color(0xFF123F84), Color(0xFF4F46E5))))
+            .background(Brush.linearGradient(listOf(Color(0xFFE8EEEE), Color(0xFFF5F7F7), Color(0xFFE5EFEB))))
             .padding(22.dp)
     ) {
         Box(
             Modifier.align(Alignment.TopEnd).offset(x = 46.dp, y = (-45).dp).size(178.dp)
-                .clip(CircleShape).background(Color.White.copy(alpha = glow))
+                .clip(CircleShape).background(Color(0xFF079B63).copy(alpha = glow))
         )
         Box(
             Modifier.align(Alignment.BottomEnd).offset(x = 17.dp, y = 47.dp).size(118.dp)
-                .clip(CircleShape).background(Color(0xFF5EEAD4).copy(alpha = 0.10f))
+                .clip(CircleShape).background(Color(0xFF079B63).copy(alpha = 0.08f))
         )
         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
                     Text(
                         dashboardText(language, "TOPLAM BAKİYE", "TOTAL BALANCE", "GESAMTSALDO"),
-                        color = Color.White.copy(alpha = 0.76f),
+                        color = Color(0xFF667573),
                         style = MaterialTheme.typography.labelMedium,
                         fontWeight = FontWeight.Bold
                     )
                     Text(
                         dashboardText(language, "Tüm hesapların · " + currency, "All accounts · " + currency, "Alle Konten · " + currency),
-                        color = Color.White.copy(alpha = 0.72f),
+                        color = Color(0xFF6D7B79),
                         style = MaterialTheme.typography.bodySmall
                     )
                 }
                 IconButton(
                     onClick = onToggleBalances,
-                    modifier = Modifier.clip(CircleShape).background(Color.White.copy(alpha = 0.10f))
+                    modifier = Modifier.clip(CircleShape).background(Color.White.copy(alpha = 0.78f))
                 ) {
                     Icon(
                         if (showBalances) Icons.Default.Shield else Icons.Default.Wallet,
                         contentDescription = dashboardText(language, "Bakiyeyi gizle/göster", "Hide/show balance", "Saldo ein-/ausblenden"),
-                        tint = Color.White
+                        tint = Color(0xFF168E68)
                     )
                 }
             }
             AnimatedContent(targetState = displayedBalance, label = "balance-value") { value ->
                 Text(
                     value,
-                    color = Color.White,
+                    color = Color(0xFF1D302C),
                     style = MaterialTheme.typography.headlineMedium,
                     fontWeight = FontWeight.ExtraBold,
                     maxLines = 1
@@ -335,13 +335,13 @@ private fun DashboardBalanceCard(
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Box(Modifier.size(7.dp).clip(CircleShape).background(Color(0xFF5EEAD4)))
                 Text(
-                    dashboardText(language, "DEMO MODU · GÜVENLİ DENEME", "DEMO MODE · SAFE SANDBOX", "DEMO-MODUS · SICHERE TESTUMGEBUNG"),
-                    color = Color.White.copy(alpha = 0.82f),
+                    dashboardText(language, "KİŞİSEL HESAP ALANI", "PERSONAL ACCOUNT", "PERSÖNLICHER KONTOBEREICH"),
+                    color = Color(0xFF168E68),
                     style = MaterialTheme.typography.labelSmall,
                     fontWeight = FontWeight.SemiBold
                 )
             }
-            HorizontalDivider(color = Color.White.copy(alpha = 0.16f))
+            HorizontalDivider(color = Color(0xFFD2DEDA))
             Row(horizontalArrangement = Arrangement.spacedBy(16.dp), modifier = Modifier.fillMaxWidth()) {
                 DashboardHeroMetric(
                     label = dashboardText(language, "HESAP", "ACCOUNTS", "KONTEN"),
@@ -366,8 +366,8 @@ private fun DashboardBalanceCard(
 @Composable
 private fun DashboardHeroMetric(label: String, value: String, modifier: Modifier = Modifier) {
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        Text(label, color = Color.White.copy(alpha = 0.65f), style = MaterialTheme.typography.labelSmall, maxLines = 1)
-        Text(value, color = Color.White, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, maxLines = 1)
+        Text(label, color = Color(0xFF70807C), style = MaterialTheme.typography.labelSmall, maxLines = 1)
+        Text(value, color = Color(0xFF1D302C), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, maxLines = 1)
     }
 }
 
@@ -400,7 +400,7 @@ private fun DashboardAction(
         ) {
             Box(
                 Modifier.size(42.dp).clip(RoundedCornerShape(15.dp))
-                    .background(Brush.linearGradient(listOf(Color(0xFF2563EB), Color(0xFF14B8A6)))),
+                    .background(Brush.linearGradient(listOf(Color(0xFF079B63), Color(0xFF35C88B)))),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(icon, contentDescription = label, tint = Color.White, modifier = Modifier.size(22.dp))

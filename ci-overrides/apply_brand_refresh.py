@@ -37,7 +37,7 @@ if "import com.turbank.mobile.ui.BrandSplashScreen" not in main:
     )
 imports = [
     "import androidx.compose.material3.MaterialTheme",
-    "import androidx.compose.material3.darkColorScheme",
+    "import androidx.compose.material3.lightColorScheme",
     "import androidx.compose.ui.graphics.Color",
     "import androidx.compose.ui.unit.dp",
     "import androidx.compose.foundation.shape.RoundedCornerShape",
@@ -67,23 +67,23 @@ if 'LaunchedEffect("brand-splash")' not in main:
 theme_anchor = "            TurBankTheme(settings.theme) {\n                when {\n"
 theme_replacement = """            TurBankTheme(settings.theme) {
                 MaterialTheme(
-                    colorScheme = darkColorScheme(
-                        primary = Color(0xFF19C37D),
-                        onPrimary = Color(0xFF042013),
-                        primaryContainer = Color(0xFF15382B),
-                        onPrimaryContainer = Color(0xFFD1FBE4),
-                        secondary = Color(0xFF31D995),
-                        onSecondary = Color(0xFF052016),
-                        background = Color(0xFF080B0E),
-                        onBackground = Color(0xFFF4F7F8),
-                        surface = Color(0xFF11171B),
-                        onSurface = Color(0xFFF3F6F7),
-                        surfaceVariant = Color(0xFF1A2228),
-                        onSurfaceVariant = Color(0xFFA4AFB6),
-                        outline = Color(0xFF3A454C),
-                        outlineVariant = Color(0xFF2A343A),
-                        error = Color(0xFFFF6672),
-                        onError = Color(0xFF30070C)
+                    colorScheme = lightColorScheme(
+                        primary = Color(0xFF079B63),
+                        onPrimary = Color(0xFFFFFFFF),
+                        primaryContainer = Color(0xFFE0F4EA),
+                        onPrimaryContainer = Color(0xFF14382C),
+                        secondary = Color(0xFF168E68),
+                        onSecondary = Color(0xFFFFFFFF),
+                        background = Color(0xFFF5F7F7),
+                        onBackground = Color(0xFF192725),
+                        surface = Color(0xFFFFFFFF),
+                        onSurface = Color(0xFF1D2A28),
+                        surfaceVariant = Color(0xFFEEF2F2),
+                        onSurfaceVariant = Color(0xFF6D7A79),
+                        outline = Color(0xFFD5DEDC),
+                        outlineVariant = Color(0xFFE2E9E7),
+                        error = Color(0xFFBA1A1A),
+                        onError = Color(0xFFFFFFFF)
                     ),
                     shapes = MaterialTheme.shapes.copy(
                         small = RoundedCornerShape(17.dp),
@@ -94,8 +94,8 @@ theme_replacement = """            TurBankTheme(settings.theme) {
                 when {
                     !splashFinished -> BrandSplashScreen()
 """
-if "colorScheme = darkColorScheme(" not in main:
-    main = replace_once(main, theme_anchor, theme_replacement, "global launch/onboarding dark theme")
+if "colorScheme = lightColorScheme(" not in main:
+    main = replace_once(main, theme_anchor, theme_replacement, "global launch/onboarding light theme")
 
 old_close = """                    else -> MainBankNavigation(vm = vm)
                 }
@@ -108,7 +108,7 @@ new_close = """                    else -> MainBankNavigation(vm = vm)
             }
         }
 """
-if "colorScheme = darkColorScheme(" in main and new_close not in main:
+if "colorScheme = lightColorScheme(" in main and new_close not in main:
     main = replace_once(main, old_close, new_close, "close global brand theme")
 main_file.write_text(main, encoding="utf-8")
 

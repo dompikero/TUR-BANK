@@ -245,6 +245,7 @@ new_imports = [
     "import androidx.compose.material.icons.filled.Notifications",
     "import androidx.compose.material.icons.filled.Person",
     "import androidx.compose.material.icons.filled.QrCode2",
+    "import androidx.compose.material.icons.filled.Search",
 ]
 if any(line not in screens for line in new_imports):
     screens = replace_once(screens, anchor, anchor + "".join(line + "\n" for line in new_imports if line not in screens), "new nav icons")
@@ -345,6 +346,9 @@ screens = replace_once(
     "remove test banner"
 )
 actions = '''                actions = {
+                    IconButton(onClick = { nav.navigate("payments") { launchSingleTop = true } }) {
+                        Icon(Icons.Default.Search, contentDescription = appText(settings.language, "Hesap, ödeme ve işlem ara", "Search accounts, payments and activity", "Konten, Zahlungen und Aktivitäten suchen"))
+                    }
                     IconButton(onClick = { nav.navigate("qr-pay") { launchSingleTop = true } }) {
                         Icon(Icons.Default.QrCode2, contentDescription = appText(settings.language, "QR ile ödeme", "QR payments", "QR-Zahlung"))
                     }

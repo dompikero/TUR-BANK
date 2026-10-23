@@ -92,7 +92,11 @@ fun PaymentsHubScreen(vm: BankViewModel, nav: NavHostController, settings: UserS
     )
 
     val filteredTransactions = recent.filter { transaction ->
-        query.isBlank() || listOf(transaction.recipient, transaction.description, transaction.category, transaction.note)
+        query.isBlank() || listOf(transaction.recipient, transaction.description, transaction.category, transaction.note, transaction.amountMinor.toString())
+            .any { it.contains(query, ignoreCase = true) }
+    }
+    val matchingAccounts = accounts.filter { account ->
+        query.isNotBlank() && listOf(account.name, account.currencyCode, account.id)
             .any { it.contains(query, ignoreCase = true) }
     }
     Column(
@@ -108,6 +112,53 @@ fun PaymentsHubScreen(vm: BankViewModel, nav: NavHostController, settings: UserS
             leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
             placeholder = { Text(paymentsText(settings.language, "İşlem, ödeme veya alıcı ara", "Search transactions, payments or recipients", "Transaktionen, Zahlungen oder Empfänger suchen")) }
         )
+
+        if (query.isNotBlank()) {
+            Column(verticalArrangement = Arrangement.spacedBy(9.dp)) {
+                Text(
+                    paymentsText(settings.language, "Hesap eşleşmeleri", "Matching accounts", "Passende Konten"),
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Bold
+                )
+                if (matchingAccounts.isEmpty() && filteredTransactions.isEmpty()) {
+                    Text(
+                        paymentsText(settings.language, "Sonuç bulunamadı. Başka bir kelime dene.", "No results found. Try another search.", "Keine Ergebnisse. Versuche einen anderen Suchbegriff."),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.padding(vertical = 6.dp)
+                    )
+                }
+                matchingAccounts.take(4).forEach { account ->
+                    Card(
+                        modifier = Modifier.fillMaxWidth().clickable { nav.navigate("accounts") { launchSingleTop = true } },
+                        shape = RoundedCornerShape(20.dp),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+                    ) {
+                        Row(
+                            Modifier.fillMaxWidth().padding(horizontal = 15.dp, vertical = 13.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            Box(
+                                Modifier.size(40.dp).clip(RoundedCornerShape(14.dp)).background(MaterialTheme.colorScheme.primaryContainer),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(Icons.Default.AccountBalanceWallet, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                            }
+                            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
+                                Text(account.name, fontWeight = FontWeight.SemiBold, maxLines = 1)
+                                Text(account.currencyCode, color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.labelSmall)
+                            }
+                            Text(
+                                Money.format(account.balanceMinor, account.currencyCode, settings.language),
+                                fontWeight = FontWeight.Bold,
+                                style = MaterialTheme.typography.bodySmall
+                            )
+                        }
+                    }
+                }
+            }
+        }
 
         Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
             Text(

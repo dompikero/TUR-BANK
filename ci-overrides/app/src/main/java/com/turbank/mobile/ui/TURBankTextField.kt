@@ -29,7 +29,7 @@ import androidx.compose.material3.LocalTextStyle
 import androidx.compose.ui.unit.dp
 
 /**
- * Shared TUR BANK input: filled graphite surface, animated emerald focus ring,
+ * Shared TUR BANK input: soft grey pill surface, animated emerald focus ring,
  * consistent rounded corners, and accessible error/focus states.
  */
 @Composable
@@ -52,7 +52,7 @@ fun TURBankTextField(
     singleLine: Boolean = false,
     maxLines: Int = if (singleLine) 1 else Int.MAX_VALUE,
     minLines: Int = 1,
-    shape: Shape = RoundedCornerShape(20.dp),
+    shape: Shape = RoundedCornerShape(23.dp),
     interactionSource: MutableInteractionSource? = null
 ) {
     val source = interactionSource ?: remember { MutableInteractionSource() }
@@ -61,8 +61,8 @@ fun TURBankTextField(
     val fill by animateColorAsState(
         targetValue = when {
             !enabled -> colors.surfaceVariant.copy(alpha = 0.42f)
-            focused -> colors.surfaceVariant
-            else -> colors.surfaceVariant.copy(alpha = 0.78f)
+            focused -> colors.surface
+            else -> colors.surfaceVariant.copy(alpha = 0.94f)
         },
         label = "input-fill"
     )
@@ -70,12 +70,12 @@ fun TURBankTextField(
         targetValue = when {
             isError -> colors.error
             focused -> colors.primary
-            else -> colors.outlineVariant.copy(alpha = 0.85f)
+            else -> colors.outlineVariant.copy(alpha = 0.55f)
         },
         label = "input-outline"
     )
     val strokeWidth by animateDpAsState(
-        targetValue = if (focused || isError) 1.6.dp else 1.dp,
+        targetValue = if (focused || isError) 1.6.dp else 0.8.dp,
         label = "input-outline-width"
     )
 

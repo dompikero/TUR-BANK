@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Apply the TUR BANK dark/emerald reference UI to all main navigation surfaces."""
+"""Apply the TUR BANK light/emerald reference UI to all main navigation surfaces."""
 from pathlib import Path
 import re
 import sys
@@ -23,10 +23,10 @@ def replace_once(text, old, new, label):
     return text.replace(old, new, 1)
 
 
-# Keep the primary surface near-black with emerald actions, matching the supplied reference.
-if "import androidx.compose.material3.darkColorScheme" not in screens and "import androidx.compose.material3.*" not in screens:
+# Use white surfaces, soft grey cards and emerald actions, matching the supplied reference.
+if "import androidx.compose.material3.lightColorScheme" not in screens and "import androidx.compose.material3.*" not in screens:
     anchor = "import androidx.compose.material3.MaterialTheme\n"
-    screens = replace_once(screens, anchor, anchor + "import androidx.compose.material3.darkColorScheme\n", "dark palette import")
+    screens = replace_once(screens, anchor, anchor + "import androidx.compose.material3.lightColorScheme\n", "dark palette import")
 if "import androidx.compose.material.icons.filled.Search" not in screens:
     anchor = "import androidx.compose.material.icons.filled.Send\n"
     if anchor not in screens:
@@ -36,36 +36,36 @@ if "import androidx.compose.material.icons.filled.Search" not in screens:
     screens = replace_once(screens, anchor, anchor + "import androidx.compose.material.icons.filled.Search\n", "home search icon import")
 
 # Install the palette around the Scaffold, so inputs, menus, bottom navigation and dialogs
-# all inherit the dark surfaces instead of only recoloring the hero cards.
+# all inherit the light surfaces instead of only recoloring the hero cards.
 scaffold_anchor = "    Scaffold(\n        topBar = {"
 scaffold_replacement = """    MaterialTheme(
-        colorScheme = darkColorScheme(
-            primary = Color(0xFF19C37D),
-            onPrimary = Color(0xFF042013),
-            primaryContainer = Color(0xFF15382B),
-            onPrimaryContainer = Color(0xFFD1FBE4),
-            secondary = Color(0xFF31D995),
-            onSecondary = Color(0xFF052016),
-            background = Color(0xFF080B0E),
-            onBackground = Color(0xFFF4F7F8),
-            surface = Color(0xFF11171B),
-            onSurface = Color(0xFFF3F6F7),
-            surfaceVariant = Color(0xFF1A2228),
-            onSurfaceVariant = Color(0xFFA4AFB6),
-            outline = Color(0xFF3A454C),
-            outlineVariant = Color(0xFF2A343A),
-            error = Color(0xFFFF6672),
-            onError = Color(0xFF30070C)
+        colorScheme = lightColorScheme(
+            primary = Color(0xFF079B63),
+            onPrimary = Color(0xFFFFFFFF),
+            primaryContainer = Color(0xFFE0F4EA),
+            onPrimaryContainer = Color(0xFF14382C),
+            secondary = Color(0xFF168E68),
+            onSecondary = Color(0xFFFFFFFF),
+            background = Color(0xFFF5F7F7),
+            onBackground = Color(0xFF192725),
+            surface = Color(0xFFFFFFFF),
+            onSurface = Color(0xFF1D2A28),
+            surfaceVariant = Color(0xFFEEF2F2),
+            onSurfaceVariant = Color(0xFF6D7A79),
+            outline = Color(0xFFD5DEDC),
+            outlineVariant = Color(0xFFE2E9E7),
+            error = Color(0xFFBA1A1A),
+            onError = Color(0xFFFFFFFF)
         ),
         typography = MaterialTheme.typography,
         shapes = MaterialTheme.shapes
     ) {
     Scaffold(
         topBar = {"""
-screens = replace_once(screens, scaffold_anchor, scaffold_replacement, "global dark palette scaffold")
+screens = replace_once(screens, scaffold_anchor, scaffold_replacement, "global light palette scaffold")
 close_anchor = "    }\n}\n\n@Composable\nprivate fun RouteEntrance"
 close_replacement = "    }\n    }\n}\n\n@Composable\nprivate fun RouteEntrance"
-screens = replace_once(screens, close_anchor, close_replacement, "close dark palette wrapper")
+screens = replace_once(screens, close_anchor, close_replacement, "close light palette wrapper")
 
 # The reference uses four/five stable destinations with payments as a first-class section.
 screens = replace_once(
@@ -192,6 +192,6 @@ if not payment_file.is_file():
     raise SystemExit(f"PaymentsHubScreen.kt overlay missing: {payment_file}")
 if 'composable("payments")' not in screens or 'BottomItem("payments"' not in screens:
     raise SystemExit("Reference payments destination was not wired into navigation.")
-if "darkColorScheme(" not in screens or "dashboardSearch" not in screens:
+if "lightColorScheme(" not in screens or "dashboardSearch" not in screens:
     raise SystemExit("Reference dark palette or home search is missing.")
-print("Applied graphite/emerald theme, home search, payments hub, compact bottom navigation and matching feature banners.")
+print("Applied clean light/emerald UI, rounded shared search/input fields, home search, payments hub and compact bottom navigation.")
