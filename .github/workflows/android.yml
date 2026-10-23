@@ -146,6 +146,7 @@ jobs:
           python3 "$GITHUB_WORKSPACE/ci-overrides/apply_visual_refresh.py" "$PROJECT_DIR"
           python3 "$GITHUB_WORKSPACE/ci-overrides/apply_personal_upgrade.py" "$PROJECT_DIR"
           python3 "$GITHUB_WORKSPACE/ci-overrides/apply_reference_ui.py" "$PROJECT_DIR"
+          python3 "$GITHUB_WORKSPACE/ci-overrides/apply_brand_refresh.py" "$PROJECT_DIR"
           test -f "$PROJECT_DIR/app/src/main/java/com/turbank/mobile/ui/ProfileScreen.kt"
           test -f "$PROJECT_DIR/app/src/main/java/com/turbank/mobile/ui/AddFundsScreen.kt"
           grep -Fq 'fun addFunds(' "$PROJECT_DIR/app/src/main/java/com/turbank/mobile/BankViewModel.kt"
@@ -174,8 +175,12 @@ jobs:
           test -f "$PROJECT_DIR/app/src/main/java/com/turbank/mobile/ui/QrPaymentScreen.kt"
           test -f "$PROJECT_DIR/app/src/main/java/com/turbank/mobile/ui/PremiumToolsScreen.kt"
           test -f "$PROJECT_DIR/app/src/main/java/com/turbank/mobile/ui/PaymentsHubScreen.kt"
+          test -f "$PROJECT_DIR/app/src/main/java/com/turbank/mobile/ui/BrandSplashScreen.kt"
+          test -f "$PROJECT_DIR/app/src/main/res/drawable/ic_tur_bank.xml"
           grep -Fq 'composable("qr-pay")' "$PROJECT_DIR/app/src/main/java/com/turbank/mobile/ui/BankScreens.kt"
           grep -Fq 'composable("payments")' "$PROJECT_DIR/app/src/main/java/com/turbank/mobile/ui/BankScreens.kt"
+          grep -Fq 'BrandSplashScreen()' "$PROJECT_DIR/app/src/main/java/com/turbank/mobile/MainActivity.kt"
+          grep -Fq 'android:icon="@drawable/ic_tur_bank"' "$PROJECT_DIR/app/src/main/AndroidManifest.xml"
           grep -Fq 'TURBANK_PAY_V1' "$PROJECT_DIR/app/src/main/java/com/turbank/mobile/ui/QrPaymentScreen.kt"
           grep -Fq 'versionName = "1.6.0"' "$PROJECT_DIR/app/build.gradle.kts"
           test -f "$PROJECT_DIR/app/src/main/java/com/turbank/mobile/ui/FinanceHubScreen.kt"
@@ -186,7 +191,7 @@ jobs:
             echo "::error::Obsolete offline academy screen must not be included."
             exit 1
           fi
-          echo "Applied animated graphite/emerald navigation, home search, payments hub, balance entry, QR payments and personal setup." | tee "$CI_REPORT_DIR/plus-ui.log"
+          echo "Applied X-logo splash/icon, rounded dark onboarding forms, graphite/emerald navigation, payments hub, balance entry and QR payments." | tee "$CI_REPORT_DIR/plus-ui.log"
 
       - name: Remove synthetic APK size filler
         id: remove_synthetic_asset
