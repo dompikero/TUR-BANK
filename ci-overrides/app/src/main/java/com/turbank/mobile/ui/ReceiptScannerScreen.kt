@@ -166,7 +166,7 @@ fun ReceiptScannerScreen(settings: UserSettings) {
                     modifier = Modifier.fillMaxWidth().height(54.dp),
                     shape = RoundedCornerShape(18.dp)
                 ) {
-                    Icon(Icons.Default.AddCircle, contentDescription = null)
+                    Icon(Icons.Default.ReceiptLong, contentDescription = null)
                     Spacer(Modifier.size(9.dp))
                     Text(receiptText(settings.language, "Fotoğraf seç ve tara", "Choose photo & scan", "Foto auswählen & scannen"))
                 }
