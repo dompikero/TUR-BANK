@@ -1,4 +1,18 @@
 package com.turbank.mobile.ui
+import java.util.concurrent.TimeUnit
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.material.icons.filled.Image
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.offset
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.LinearEasing
+import androidx.camera.core.FocusMeteringAction
+import android.view.MotionEvent
+import android.view.HapticFeedbackConstants
+import android.util.Size
 
 import android.Manifest
 import android.content.pm.PackageManager
@@ -84,6 +98,16 @@ fun CameraQrScannerScreen(
     var camera by remember { mutableStateOf<Camera?>(null) }
     var torchEnabled by remember { mutableStateOf(false) }
     var scanState by remember { mutableStateOf("") }
+    var galleryReadInProgress by remember { mutableStateOf(false) }
+    val scanLineY by rememberInfiniteTransition(label = "qr-scan-line").animateFloat(
+        initialValue = -102f,
+        targetValue = 102f,
+        animationSpec = infiniteRepeatable(
+            animation = androidx.compose.animation.core.tween(durationMillis = 1_450, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "qr-scan-offset"
+    )
     val delivered = remember { AtomicBoolean(false) }
     val previewView = remember(context) {
         PreviewView(context).apply {
@@ -105,6 +129,39 @@ fun CameraQrScannerScreen(
         BarcodeScanning.getClient(options)
     }
     val analyzerExecutor = remember { Executors.newSingleThreadExecutor() }
+    val galleryLauncher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+        if (uri == null) {
+            galleryReadInProgress = false
+        } else {
+            galleryReadInProgress = true
+            scanState = cameraQrText(language, "Galerideki QR kodu okunuyor…", "Reading the QR code from image…", "QR-Code im Bild wird gelesen…")
+            runCatching { InputImage.fromFilePath(context, uri) }
+                .onSuccess { image ->
+                    scanner.process(image)
+                        .addOnSuccessListener { barcodes ->
+                            val raw = barcodes.firstOrNull { it.format == Barcode.FORMAT_QR_CODE && !it.rawValue.isNullOrBlank() }?.rawValue
+                            galleryReadInProgress = false
+                            if (raw != null && delivered.compareAndSet(false, true)) {
+                                mainExecutor.execute {
+                                    previewView.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
+                                    scanState = cameraQrText(language, "QR bulundu, açılıyor…", "QR found, opening…", "QR gefunden, wird geöffnet…")
+                                    onCodeRead(raw)
+                                }
+                            } else if (raw == null) {
+                                scanState = cameraQrText(language, "Bu görselde QR kod bulunamadı. Daha net bir görsel dene.", "No QR code found in this image. Try a clearer image.", "Kein QR-Code im Bild gefunden. Versuche ein klareres Bild.")
+                            }
+                        }
+                        .addOnFailureListener {
+                            galleryReadInProgress = false
+                            scanState = cameraQrText(language, "Görsel okunamadı. Başka bir görsel dene.", "Could not read the image. Try another image.", "Bild konnte nicht gelesen werden. Versuche ein anderes Bild.")
+                        }
+                }
+                .onFailure {
+                    galleryReadInProgress = false
+                    scanState = cameraQrText(language, "Görsel açılamadı. Galeriden başka bir görsel seç.", "Could not open the image. Choose another one from the gallery.", "Bild konnte nicht geöffnet werden. Wähle ein anderes aus der Galerie.")
+                }
+        }
+    }
 
     LaunchedEffect(Unit) {
         if (!hasPermission) permissionLauncher.launch(Manifest.permission.CAMERA)
@@ -125,6 +182,7 @@ fun CameraQrScannerScreen(
             try {
                 val preview = Preview.Builder().build().also { it.setSurfaceProvider(previewView.surfaceProvider) }
                 analysis = ImageAnalysis.Builder()
+                    .setTargetResolution(Size(1280, 720))
                     .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
                     .build()
                     .also { useCase ->
@@ -137,8 +195,12 @@ fun CameraQrScannerScreen(
                                 scanner.process(input)
                                     .addOnSuccessListener { barcodes ->
                                         val raw = barcodes.firstOrNull { it.format == Barcode.FORMAT_QR_CODE && !it.rawValue.isNullOrBlank() }?.rawValue
-                                        if (raw != null && delivered.compareAndSet(false, true)) {
-                                            mainExecutor.execute { onCodeRead(raw) }
+                                        if (raw != null && !galleryReadInProgress && delivered.compareAndSet(false, true)) {
+                                            mainExecutor.execute {
+                                                previewView.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
+                                                scanState = cameraQrText(language, "QR bulundu, açılıyor…", "QR found, opening…", "QR gefunden, wird geöffnet…")
+                                                onCodeRead(raw)
+                                            }
                                         }
                                     }
                                     .addOnFailureListener {
@@ -150,7 +212,7 @@ fun CameraQrScannerScreen(
                     }
                 provider.unbindAll()
                 camera = provider.bindToLifecycle(lifecycleOwner, CameraSelector.DEFAULT_BACK_CAMERA, preview, analysis)
-                scanState = cameraQrText(language, "QR kodunu çerçevenin içine hizala.", "Align the QR code inside the frame.", "Richte den QR-Code im Rahmen aus.")
+                scanState = cameraQrText(language, "QR kodunu çerçevenin içine hizala · netleştirmek için ekrana dokun.", "Align the QR code inside the frame · tap to focus.", "Richte den QR-Code im Rahmen aus · zum Fokussieren tippen.")
             } catch (error: Exception) {
                 scanState = cameraQrText(language, "Kamera açılamadı. İzni ve kamera erişimini kontrol et.", "Camera could not start. Check permission and camera access.", "Kamera konnte nicht starten. Prüfe Berechtigung und Kamerazugriff.")
             }
@@ -188,10 +250,37 @@ fun CameraQrScannerScreen(
 
         Box(Modifier.weight(1f).fillMaxWidth().clip(RoundedCornerShape(30.dp)).background(Color(0xFF10171B))) {
             if (hasPermission) {
-                AndroidView(factory = { previewView }, modifier = Modifier.fillMaxSize())
+                AndroidView(
+                    factory = { previewView },
+                    modifier = Modifier.fillMaxSize(),
+                    update = { view ->
+                        view.setOnTouchListener { _, event ->
+                            if (event.action == MotionEvent.ACTION_UP) {
+                                camera?.let { boundCamera ->
+                                    runCatching {
+                                        val point = view.meteringPointFactory.createPoint(event.x, event.y)
+                                        val action = FocusMeteringAction.Builder(point)
+                                            .setAutoCancelDuration(3, TimeUnit.SECONDS)
+                                            .build()
+                                        boundCamera.cameraControl.startFocusAndMetering(action)
+                                        view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
+                                        scanState = cameraQrText(language, "Odak güncellendi · QR kodunu çerçeveye yaklaştır.", "Focus adjusted · move the QR code into the frame.", "Fokus angepasst · bewege den QR-Code in den Rahmen.")
+                                    }.onFailure {
+                                        scanState = cameraQrText(language, "Odaklanamadım. Telefonu sabit tutup biraz yaklaştır.", "Could not focus. Hold steady and move a little closer.", "Fokus fehlgeschlagen. Halte das Handy ruhig und gehe etwas näher heran.")
+                                    }
+                                }
+                            }
+                            true
+                        }
+                    }
+                )
                 Box(
                     Modifier.align(Alignment.Center).size(250.dp)
-                        .border(3.dp, Color(0xFF24D18A), RoundedCornerShape(28.dp))
+                        .border(2.dp, Color(0xFF24D18A).copy(alpha = 0.92f), RoundedCornerShape(28.dp))
+                )
+                Box(
+                    Modifier.align(Alignment.Center).width(214.dp).offset(y = scanLineY.dp).height(2.dp)
+                        .background(Brush.horizontalGradient(listOf(Color.Transparent, Color(0xFF55F5B1), Color.Transparent)))
                 )
                 Box(
                     Modifier.align(Alignment.BottomCenter).fillMaxWidth()
@@ -233,14 +322,20 @@ fun CameraQrScannerScreen(
                 modifier = Modifier.weight(1f).height(52.dp),
                 shape = RoundedCornerShape(17.dp)
             ) { Text(if (torchEnabled) cameraQrText(language, "Flaşı kapat", "Turn flash off", "Blitz aus") else cameraQrText(language, "Flaşı aç", "Turn flash on", "Blitz an")) }
-            Button(onClick = onClose, modifier = Modifier.weight(1f).height(52.dp), shape = RoundedCornerShape(17.dp)) {
-                Text(cameraQrText(language, "Geri dön", "Back", "Zurück"))
+            Button(
+                onClick = { galleryLauncher.launch("image/*") },
+                modifier = Modifier.weight(1f).height(52.dp),
+                shape = RoundedCornerShape(17.dp)
+            ) {
+                Icon(Icons.Default.Image, contentDescription = null)
+                Spacer(Modifier.size(7.dp))
+                Text(cameraQrText(language, "Galeriden QR", "QR from gallery", "QR aus Galerie"))
             }
         }
 
         Card(shape = RoundedCornerShape(19.dp), colors = CardDefaults.cardColors(containerColor = Color(0xFF11171B))) {
             Text(
-                cameraQrText(language, "QR okununca tarama otomatik durur. İşlem kaydedilmeden önce alıcı ve tutarı ekranda kontrol et.", "Scanning stops when a QR is read. Review the recipient and amount before saving any entry.", "Nach dem Lesen stoppt der Scanner. Prüfe Empfänger und Betrag vor dem Speichern."),
+                cameraQrText(language, "Netlik için görüntüye dokunabilir, flaşı açabilir veya galeriden QR seçebilirsin. QR okununca tarama durur; işlemi onaylamadan önce alıcıyı ve tutarı kontrol et.", "Tap the preview to focus, turn on the flash, or choose a QR image from your gallery. Scanning stops when a QR is read; check the recipient and amount before confirming.", "Tippe zum Fokussieren auf die Vorschau, nutze den Blitz oder wähle ein QR-Bild aus der Galerie. Nach dem Lesen stoppt der Scanner; prüfe Empfänger und Betrag vor der Bestätigung."),
                 modifier = Modifier.fillMaxWidth().padding(14.dp),
                 color = Color(0xFFA4AFB6),
                 style = MaterialTheme.typography.bodySmall

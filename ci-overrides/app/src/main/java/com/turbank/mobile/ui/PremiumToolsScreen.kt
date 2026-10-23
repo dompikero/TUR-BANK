@@ -28,7 +28,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBalanceWallet
-import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.Analytics
 import androidx.compose.material.icons.filled.CreditCard
 import androidx.compose.material.icons.filled.GridView
@@ -75,7 +74,6 @@ fun PremiumToolsScreen(settings: UserSettings, nav: NavHostController) {
     var menuVisible by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) { menuVisible = true }
     val destinations = listOf(
-        BankTool("add-funds", toolsText(language, "Hesaba para ekle", "Add funds", "Geld hinzufügen"), toolsText(language, "Bakiyene giriş kaydı ekle", "Add a balance entry", "Saldoeintrag hinzufügen"), Icons.Default.AddCircle),
         BankTool("qr-pay", toolsText(language, "QR ile ödeme", "QR payments", "QR-Zahlung"), toolsText(language, "QR okut veya talep oluştur", "Scan or create a request", "Scannen oder Anfrage erstellen"), Icons.Default.QrCode2),
         BankTool("transfer", toolsText(language, "Para gönder", "Send money", "Geld senden"), toolsText(language, "Alıcıya veya kendi hesabına", "To a recipient or own account", "An Empfänger oder eigenes Konto"), Icons.Default.Send),
         BankTool("cards", toolsText(language, "Kartlar", "Cards", "Karten"), toolsText(language, "Sanal kartlarını yönet", "Manage virtual cards", "Virtuelle Karten verwalten"), Icons.Default.CreditCard),

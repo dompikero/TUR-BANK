@@ -27,6 +27,7 @@ imports = [
     "import androidx.compose.animation.core.spring",
     "import androidx.compose.animation.core.tween",
     "import androidx.compose.material.icons.filled.AddCircle",
+    "import androidx.compose.material.icons.filled.QrCode2",
     "import androidx.compose.foundation.interaction.MutableInteractionSource",
     "import androidx.compose.foundation.interaction.collectIsPressedAsState",
     "import androidx.compose.ui.draw.shadow",
@@ -150,10 +151,10 @@ private fun HomeScreen(vm: BankViewModel, nav: NavHostController, settings: User
         Row(horizontalArrangement = Arrangement.spacedBy(9.dp), modifier = Modifier.fillMaxWidth()) {
             DashboardAction(Icons.Default.SwapHoriz, stringResource(R.string.send_money), Modifier.weight(1f)) { nav.navigate("transfer") }
             DashboardAction(
-                Icons.Default.AddCircle,
-                dashboardText(settings.language, "Para ekle", "Add funds", "Geld hinzufügen"),
+                Icons.Default.QrCode2,
+                dashboardText(settings.language, "QR ile ödeme", "QR payments", "QR-Zahlung"),
                 Modifier.weight(1f)
-            ) { nav.navigate("add-funds") }
+            ) { nav.navigate("qr-pay") }
             DashboardAction(Icons.Default.CreditCard, stringResource(R.string.cards), Modifier.weight(1f)) { nav.navigate("cards") }
         }
         Row(horizontalArrangement = Arrangement.spacedBy(9.dp), modifier = Modifier.fillMaxWidth()) {

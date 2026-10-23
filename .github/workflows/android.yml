@@ -152,8 +152,12 @@ jobs:
           test -f "$PROJECT_DIR/app/src/main/java/com/turbank/mobile/ui/AddFundsScreen.kt"
           grep -Fq 'fun addFunds(' "$PROJECT_DIR/app/src/main/java/com/turbank/mobile/BankViewModel.kt"
           grep -Fq 'composable("add-funds")' "$PROJECT_DIR/app/src/main/java/com/turbank/mobile/ui/BankScreens.kt"
-          grep -Fq 'BankTool("add-funds"' "$PROJECT_DIR/app/src/main/java/com/turbank/mobile/ui/PremiumToolsScreen.kt"
-          grep -Fq 'versionName = "1.8.0"' "$PROJECT_DIR/app/build.gradle.kts"
+          if grep -Fq 'BankTool("add-funds"' "$PROJECT_DIR/app/src/main/java/com/turbank/mobile/ui/PremiumToolsScreen.kt"; then
+            echo "::error::Manual balance editing must remain hidden in Settings."
+            exit 1
+          fi
+          grep -Fq 'stringResource(R.string.secret_add_funds)' "$PROJECT_DIR/app/src/main/java/com/turbank/mobile/ui/BankScreens.kt"
+          grep -Fq 'versionName = "1.8.1"' "$PROJECT_DIR/app/build.gradle.kts"
           python3 - "$PROJECT_DIR/app/src/main/res" <<'PY'
           import pathlib, re, sys, xml.etree.ElementTree as ET
           root = pathlib.Path(sys.argv[1])
