@@ -122,7 +122,7 @@ screens = replace_once(
     '                singleLine = true,\n'
     '                shape = RoundedCornerShape(19.dp),\n'
     '                leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },\n'
-    '                placeholder = { Text(dashboardText(settings.language, "ATM, ödeme ve işlem ara", "Search ATMs, payments and activity", "ATMs, Zahlungen und Aktivitäten suchen")) }\n'
+    '                placeholder = { Text(dashboardText(settings.language, "Hesap, ödeme ve işlem ara", "Search accounts, payments and activity", "Konten, Zahlungen und Aktivitäten suchen")) }\n'
     '            )\n'
     '        }\n'
     '        DashboardEntrance(index = 2, visible = dashboardReady) {\n'
@@ -192,6 +192,6 @@ if not payment_file.is_file():
     raise SystemExit(f"PaymentsHubScreen.kt overlay missing: {payment_file}")
 if 'composable("payments")' not in screens or 'BottomItem("payments"' not in screens:
     raise SystemExit("Reference payments destination was not wired into navigation.")
-if "lightColorScheme(" not in screens or "dashboardSearch" not in screens:
+if "lightColorScheme(" not in screens or "dashboardSearch" not in screens or "Search accounts, payments and activity" not in screens:
     raise SystemExit("Reference dark palette or home search is missing.")
 print("Applied clean light/emerald UI, rounded shared search/input fields, home search, payments hub and compact bottom navigation.")

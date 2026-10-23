@@ -178,7 +178,7 @@ private fun HomeScreen(vm: BankViewModel, nav: NavHostController, settings: User
         if (accounts.isEmpty()) {
             DashboardEntrance(index = 4, visible = dashboardReady) { EmptyState(stringResource(R.string.no_items)) }
         }
-        accounts.take(3).forEachIndexed { index, account ->
+        accounts.filter { account -> dashboardSearch.isBlank() || listOf(account.name, account.currencyCode, account.id).any { it.contains(dashboardSearch, true) } }.take(3).forEachIndexed { index, account ->
             DashboardEntrance(index = 4 + index, visible = dashboardReady) {
                 AccountRow(account, showBalances, settings.language, onClick = { nav.navigate("accounts") })
             }
