@@ -54,6 +54,12 @@ for dep in deps:
         gradle = replace_once(gradle, anchor, anchor + dep + "\n", "bundled ML dependency insertion")
 gradle_file.write_text(gradle, encoding="utf-8")
 
+# Keep the visible in-app version labels aligned with the signed APK metadata.
+for strings_file in (app / "src/main/res").rglob("strings.xml"):
+    resource_text = strings_file.read_text(encoding="utf-8")
+    resource_text = resource_text.replace("1.6.0", "1.7.0")
+    strings_file.write_text(resource_text, encoding="utf-8")
+
 
 # Add the receipt scanner as a real route and a discoverable tools destination.
 screens_file = ui / "BankScreens.kt"
