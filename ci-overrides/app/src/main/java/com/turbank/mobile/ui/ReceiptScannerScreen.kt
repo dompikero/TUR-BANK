@@ -29,11 +29,9 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.ContentCopy
-import androidx.compose.material.icons.filled.DocumentScanner
 import androidx.compose.material.icons.filled.ImageSearch
 import androidx.compose.material.icons.filled.ReceiptLong
 import androidx.compose.material.icons.filled.Security
-import androidx.compose.material.icons.filled.UploadFile
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -143,7 +141,7 @@ fun ReceiptScannerScreen(settings: UserSettings) {
                     Modifier.size(48.dp).clip(RoundedCornerShape(16.dp)).background(Color.White.copy(alpha = 0.10f)),
                     contentAlignment = Alignment.Center
                 ) {
-                    Icon(Icons.Default.DocumentScanner, contentDescription = null, tint = Color(0xFF38E29A), modifier = Modifier.size(28.dp))
+                    Icon(Icons.Default.ReceiptLong, contentDescription = null, tint = Color(0xFF38E29A), modifier = Modifier.size(28.dp))
                 }
                 Text(receiptText(settings.language, "Akıllı fiş tarayıcı", "Smart receipt scanner", "Intelligenter Belegscanner"), color = Color.White, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.ExtraBold)
                 Text(
@@ -168,7 +166,7 @@ fun ReceiptScannerScreen(settings: UserSettings) {
                     modifier = Modifier.fillMaxWidth().height(54.dp),
                     shape = RoundedCornerShape(18.dp)
                 ) {
-                    Icon(Icons.Default.UploadFile, contentDescription = null)
+                    Icon(Icons.Default.AddCircle, contentDescription = null)
                     Spacer(Modifier.size(9.dp))
                     Text(receiptText(settings.language, "Fotoğraf seç ve tara", "Choose photo & scan", "Foto auswählen & scannen"))
                 }
