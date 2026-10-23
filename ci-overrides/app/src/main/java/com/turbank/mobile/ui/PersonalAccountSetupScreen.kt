@@ -1,5 +1,6 @@
 package com.turbank.mobile.ui
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -38,6 +39,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import com.turbank.mobile.R
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -74,22 +78,28 @@ fun PersonalAccountSetupScreen(
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            Box(
-                Modifier.size(54.dp).clip(RoundedCornerShape(18.dp))
-                    .background(Brush.linearGradient(listOf(Color(0xFF2563EB), Color(0xFF14B8A6)))),
-                contentAlignment = Alignment.Center
-            ) { Text("T", color = Color.White, style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Black) }
+            Image(
+                painter = painterResource(R.drawable.ic_tur_bank),
+                contentDescription = "TUR BANK",
+                modifier = Modifier.size(64.dp).clip(RoundedCornerShape(18.dp)),
+                contentScale = ContentScale.Crop
+            )
             Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
                 Text("TUR BANK", color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.ExtraBold)
                 Text(setupText(language, "Hesabını oluştur", "Set up your account", "Richte dein Konto ein"), style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
             }
         }
         Card(
-            shape = RoundedCornerShape(26.dp),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
+            shape = RoundedCornerShape(27.dp),
+            colors = CardDefaults.cardColors(containerColor = Color(0xFF101D19))
         ) {
-            Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(setupText(language, "Sana özel bir alan", "Your personal space", "Dein persönlicher Bereich"), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onPrimaryContainer)
+            Column(
+                Modifier.fillMaxWidth()
+                    .background(Brush.linearGradient(listOf(Color(0xFF0D1714), Color(0xFF18362A), Color(0xFF10231D))))
+                    .padding(20.dp),
+                verticalArrangement = Arrangement.spacedBy(9.dp)
+            ) {
+                Text(setupText(language, "Sana özel bir alan", "Your personal space", "Dein persönlicher Bereich"), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = Color.White)
                 Text(
                     setupText(
                         language,
@@ -97,7 +107,7 @@ fun PersonalAccountSetupScreen(
                         "Language selected. Create your profile, first account on this device, and a private app PIN.",
                         "Sprache ausgewählt. Erstelle dein Profil, dein erstes lokales Konto und eine persönliche App-PIN."
                     ),
-                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                    color = Color.White.copy(alpha = 0.84f),
                     style = MaterialTheme.typography.bodyMedium
                 )
             }
