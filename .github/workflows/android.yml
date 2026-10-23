@@ -147,12 +147,13 @@ jobs:
           python3 "$GITHUB_WORKSPACE/ci-overrides/apply_personal_upgrade.py" "$PROJECT_DIR"
           python3 "$GITHUB_WORKSPACE/ci-overrides/apply_reference_ui.py" "$PROJECT_DIR"
           python3 "$GITHUB_WORKSPACE/ci-overrides/apply_brand_refresh.py" "$PROJECT_DIR"
+          python3 "$GITHUB_WORKSPACE/ci-overrides/apply_modern_experience.py" "$PROJECT_DIR"
           test -f "$PROJECT_DIR/app/src/main/java/com/turbank/mobile/ui/ProfileScreen.kt"
           test -f "$PROJECT_DIR/app/src/main/java/com/turbank/mobile/ui/AddFundsScreen.kt"
           grep -Fq 'fun addFunds(' "$PROJECT_DIR/app/src/main/java/com/turbank/mobile/BankViewModel.kt"
           grep -Fq 'composable("add-funds")' "$PROJECT_DIR/app/src/main/java/com/turbank/mobile/ui/BankScreens.kt"
           grep -Fq 'BankTool("add-funds"' "$PROJECT_DIR/app/src/main/java/com/turbank/mobile/ui/PremiumToolsScreen.kt"
-          grep -Fq 'versionName = "1.6.0"' "$PROJECT_DIR/app/build.gradle.kts"
+          grep -Fq 'versionName = "1.7.0"' "$PROJECT_DIR/app/build.gradle.kts"
           python3 - "$PROJECT_DIR/app/src/main/res" <<'PY'
           import pathlib, re, sys, xml.etree.ElementTree as ET
           root = pathlib.Path(sys.argv[1])
@@ -176,13 +177,17 @@ jobs:
           test -f "$PROJECT_DIR/app/src/main/java/com/turbank/mobile/ui/PremiumToolsScreen.kt"
           test -f "$PROJECT_DIR/app/src/main/java/com/turbank/mobile/ui/PaymentsHubScreen.kt"
           test -f "$PROJECT_DIR/app/src/main/java/com/turbank/mobile/ui/BrandSplashScreen.kt"
+          test -f "$PROJECT_DIR/app/src/main/java/com/turbank/mobile/ui/TURBankTextField.kt"
+          test -f "$PROJECT_DIR/app/src/main/java/com/turbank/mobile/ui/ReceiptScannerScreen.kt"
+          grep -Fq 'composable("receipt-scan")' "$PROJECT_DIR/app/src/main/java/com/turbank/mobile/ui/BankScreens.kt"
+          grep -Fq 'implementation("com.google.mlkit:text-recognition:16.0.1")' "$PROJECT_DIR/app/build.gradle.kts"
           test -f "$PROJECT_DIR/app/src/main/res/drawable/ic_tur_bank.xml"
           grep -Fq 'composable("qr-pay")' "$PROJECT_DIR/app/src/main/java/com/turbank/mobile/ui/BankScreens.kt"
           grep -Fq 'composable("payments")' "$PROJECT_DIR/app/src/main/java/com/turbank/mobile/ui/BankScreens.kt"
           grep -Fq 'BrandSplashScreen()' "$PROJECT_DIR/app/src/main/java/com/turbank/mobile/MainActivity.kt"
           grep -Fq 'android:icon="@drawable/ic_tur_bank"' "$PROJECT_DIR/app/src/main/AndroidManifest.xml"
           grep -Fq 'TURBANK_PAY_V1' "$PROJECT_DIR/app/src/main/java/com/turbank/mobile/ui/QrPaymentScreen.kt"
-          grep -Fq 'versionName = "1.6.0"' "$PROJECT_DIR/app/build.gradle.kts"
+          grep -Fq 'versionName = "1.7.0"' "$PROJECT_DIR/app/build.gradle.kts"
           test -f "$PROJECT_DIR/app/src/main/java/com/turbank/mobile/ui/FinanceHubScreen.kt"
           grep -Fq 'composable("profile")' "$PROJECT_DIR/app/src/main/java/com/turbank/mobile/ui/BankScreens.kt"
           grep -Fq 'composable("finance-hub")' "$PROJECT_DIR/app/src/main/java/com/turbank/mobile/ui/BankScreens.kt"
@@ -191,7 +196,7 @@ jobs:
             echo "::error::Obsolete offline academy screen must not be included."
             exit 1
           fi
-          echo "Applied X-logo splash/icon, rounded dark onboarding forms, graphite/emerald navigation, payments hub, balance entry and QR payments." | tee "$CI_REPORT_DIR/plus-ui.log"
+          echo "Applied animated shared input fields, X-logo splash, offline receipt OCR, image labeling, graphite/emerald navigation, payments hub and QR payments." | tee "$CI_REPORT_DIR/plus-ui.log"
 
       - name: Remove synthetic APK size filler
         id: remove_synthetic_asset
@@ -329,7 +334,7 @@ jobs:
             echo "APK path: $APK_PATH"
             echo "APK size: $APK_BYTES bytes"
             echo "APK size in MiB: $(awk -v b="$APK_BYTES" 'BEGIN {printf "%.2f", b/1048576}')"
-            echo "Version: 1.6.0"
+            echo "Version: 1.7.0"
             echo "Offline videos: none"
             echo "Synthetic filler: none"
             echo "SHA-256: $(sha256sum "$APK_PATH" | awk '{print $1}')"
