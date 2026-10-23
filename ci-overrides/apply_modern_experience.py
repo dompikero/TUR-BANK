@@ -73,7 +73,7 @@ if receipt_screen.exists():
 translations = {
     "values/strings.xml": {
         "secret_tools_title": "Hidden tools",
-        "secret_tools_note": "Local-only utilities for managing this device's account ledger. No bank connection is made.",
+        "secret_tools_note": "Local utilities for account records on this device. No bank connection is made.",
         "secret_add_funds": "Add funds to account",
     },
     "values-tr/strings.xml": {
